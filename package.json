@@ -1,0 +1,41 @@
+{
+    "name": "logos-type-system",
+    "version": "1.0.0",
+    "description": "Contains the Type class and associated parse trees.",
+    "keywords": [
+        "types",
+        "type system",
+        "logos",
+        "simple type theory"
+    ],
+    "jest": {
+        "roots": [
+            "./tests"
+        ],
+        "transform": {
+            "^.+\\.[jt]sx?$": "ts-jest"
+        },
+        "collectCoverage": true,
+        "collectCoverageFrom": [
+            "./src/**/*.ts"
+        ]
+    },
+    "scripts": {
+        "test": "jest --runInBand",
+        "build": "tsc -p .",
+        "docs": "typedoc"
+    },
+    "devDependencies": {
+        "@types/jest": "^25.2.3",
+        "@typescript-eslint/eslint-plugin": "^2.34.0",
+        "@typescript-eslint/parser": "^2.34.0",
+        "eslint": "^7.6.0",
+        "jest": "^25.5.4",
+        "ts-jest": "^25.5.1",
+        "typedoc": "^0.17.8"
+    },
+    "dependencies": {
+        "logos-utils": "^1.0.4",
+        "typescript": "^3.9.7"
+    }
+}

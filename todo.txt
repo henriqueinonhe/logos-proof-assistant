@@ -1,0 +1,3 @@
+- Implement TypeParser
+- Update TypeParseTreeNode tests
+- Rework ParsingException
