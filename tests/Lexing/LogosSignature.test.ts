@@ -1,7 +1,21 @@
-import { Signature } from "../../src/Lexing/Signature";
 import { PunctuationTokenRecord } from "../../src/Lexing/PunctuationTokenRecord";
 import { TypedTokenRecord } from "../../src/Lexing/TypedTokenRecord";
 import { Type } from "../../src/Type/Type";
+import { LogosSignature } from "../../src/Lexing/LogosSignature";
+
+describe("constructor", () =>
+{
+  describe("Post Conditions", () =>
+  {
+    test("Punctuation tokens are added to the signature", () =>
+    {
+      const signature = new LogosSignature();
+      expect(signature["tokenRecords"].has("(")).toBe(true);
+      expect(signature["tokenRecords"].has(")")).toBe(true);
+      expect(signature["tokenRecords"].has(" ")).toBe(true);
+    });
+  });
+});
 
 describe("addRecord()", () =>
 {
@@ -9,7 +23,7 @@ describe("addRecord()", () =>
   {
     test("Token already associated with a record", () =>
     {
-      const signature = new Signature();
+      const signature = new LogosSignature();
       signature["tokenRecords"].set("<Whitespace>", new PunctuationTokenRecord());
 
       expect(() => signature.addRecord("<Whitespace>", new PunctuationTokenRecord())).toThrow("record associated");
@@ -20,7 +34,7 @@ describe("addRecord()", () =>
   {
     test("Adds token record properly", () =>
     {
-      const signature = new Signature();
+      const signature = new LogosSignature();
       signature.addRecord("R", new TypedTokenRecord(new Type("[i,i]->o")));
       expect((signature["tokenRecords"].get("R") as TypedTokenRecord).getType().toString()).toBe("[i,i]->o");
     });
@@ -33,7 +47,7 @@ describe("removeRecord()", () =>
   {
     test("No record associated with token", () =>
     {
-      const signature = new Signature();
+      const signature = new LogosSignature();
       expect(() => signature.removeRecord("A")).toThrow("There is no record");
     });
   });
@@ -42,7 +56,7 @@ describe("removeRecord()", () =>
   {
     test("Record is removed properly", () =>
     {
-      const signature = new Signature();
+      const signature = new LogosSignature();
       signature.addRecord("Dobs", new PunctuationTokenRecord());
       signature.removeRecord("Dobs");
       expect(signature["tokenRecords"].get("Dobs")).toBe(undefined);
@@ -56,14 +70,14 @@ describe("getRecord()", () =>
   {
     test("No record associated with token", () =>
     {
-      const signature = new Signature();
+      const signature = new LogosSignature();
       expect(() => signature.getRecord("+")).toThrow("There is no record associated");
     });
   });
 
   describe("Post Conditions", () =>
   {
-    const signature = new Signature();
+    const signature = new LogosSignature();
     signature.addRecord("+", new TypedTokenRecord(new Type("[i,i]->o")));
     expect(signature.getRecord("+").sort()).toBe("TypedToken");
   });
