@@ -1,6 +1,7 @@
 import { TypedTokenRecord } from "./TypedTokenRecord";
 import { Type } from "../Type/Type";
 
+//TODO Implement
 export class VariableBindingTokenRecord extends TypedTokenRecord
 {
   /**
