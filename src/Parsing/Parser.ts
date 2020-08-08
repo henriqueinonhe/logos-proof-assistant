@@ -1,14 +1,11 @@
 import { Lexer } from "../Lexing/Lexer";
 import { Signature } from "../Lexing/Signature";
+import { FunctionalSymbolsAndOperatorsTable } from "./FunctionalSymbolsAndOperatorsTable";
 
 export class Parser
 {
-  constructor(lexer : Lexer, signature : Signature)
+  public parse(lexer : Lexer, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable) : void //NOTE Stub for now
   {
-    this.lexer = lexer;
-    this.signature = signature;
-  }
 
-  private lexer : Lexer;
-  private signature : Signature;
+  }
 }

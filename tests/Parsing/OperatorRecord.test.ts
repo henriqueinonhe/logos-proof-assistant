@@ -28,4 +28,16 @@ describe("constructor", () =>
       expect(() => new OperatorRecord(2, 3, 10, OperatorAssociativity.Right)).toThrow("cannot be greater");
     });
   });
+
+  describe("Post Conditions", () =>
+  {
+    test("Arity, operator position, precedence and associativity are initialized to input values", () =>
+    {
+      const record = new OperatorRecord(2, 1, 10, OperatorAssociativity.Left);
+      expect(record.arity).toBe(2);
+      expect(record.operatorPosition).toBe(1);
+      expect(record.precedence).toBe(10);
+      expect(record.associativity).toBe(OperatorAssociativity.Left);
+    });
+  });
 });

@@ -1,59 +1,43 @@
 import { Lexer } from "./Lexer";
-import { TokenString } from "../Token/TokenString";
-import { LogosSignature } from "./LogosSignature";
 import { Token } from "../Token/Token";
-import { InvalidArgumentException } from "../Utils/LogosUtils";
+import { Signature } from "./Signature";
 
-export class LogosLexer implements Lexer
+export class LogosLexer extends Lexer
 {
   /**
-   * Lexes a string into a [[TokenString]].
-   * 
-   * Tokens must be present in the signature, otherwise lexing will fail.
-   * 
-   * Pre Conditions:
-   * - Each recognized token must be present in the signature.
-   * 
-   * Post Conditions:
-   * - Returns lexed [[TokenString]].
+   * Returns next token in string.
    * 
    * @param string 
    * @param signature 
    */
-  public lex(string : string, signature : LogosSignature) : TokenString
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  protected nextToken(string : string, currentIndex : number, signature : Signature) : [Token, number]
   {
-    const tokenList = [];
-    let index = 0;
-    while(index < string.length)
+    const currentChar = string[currentIndex];
+    if(currentChar === "(" ||
+       currentChar === ")")
     {
-      const currentChar = string[index];
-      if(currentChar === "(" ||
-         currentChar === ")")
-      {
-        tokenList.push(new Token(currentChar));
-        index++;
-      }
-      else if(currentChar === " ")
-      {
-        index = this.lexWhitespace(tokenList, string, index);
-      }
-      else
-      {
-        index = this.lexNonPunctuationToken(tokenList, string, index, signature);
-      }
+      const newIndex = currentIndex + 1;
+      return [new Token(currentChar), newIndex];
     }
-    return new TokenString(tokenList);
+    else if(currentChar === " ")
+    {
+      return this.lexWhitespace(string, currentIndex);
+    }
+    else
+    {
+      return this.lexNonPunctuationToken(string, currentIndex);
+    }
   }
 
   /**
    * Lexes whitespace substring and returns the index to a character after
    * the substring.
    * 
-   * @param tokenList 
    * @param string 
    * @param startIndex 
    */
-  private lexWhitespace(tokenList : Array<Token>, string : string, startIndex : number) : number
+  private lexWhitespace(string : string, startIndex : number) : [Token, number]
   {
     //Finds end of whitespace-only substring
     let index = startIndex;
@@ -61,8 +45,8 @@ export class LogosLexer implements Lexer
     {
       index++;
     }
-    tokenList.push(new Token(" "));
-    return index;
+    
+    return [new Token(" "), index];
   }
 
   /**
@@ -76,7 +60,7 @@ export class LogosLexer implements Lexer
    * @param string 
    * @param startIndex 
    */
-  private lexNonPunctuationToken(tokenList : Array<Token>, string : string, startIndex : number, signature : LogosSignature) : number
+  private lexNonPunctuationToken(string : string, startIndex : number) : [Token, number]
   {
     let token = "";
     let index = startIndex;
@@ -87,17 +71,18 @@ export class LogosLexer implements Lexer
       index++;
       currentCharacter = string[index];
     }
-    
-    if(!signature.hasRecord(token))
-    {
-      throw new InvalidArgumentException(`Token "${token}" was lexed but no record associated with it was found in the signature!`);
-    }
-    tokenList.push(new Token(token));
-    return index;
+    return [new Token(token), index];
   }
 
   /**
    * Returns whether a given character is a separator.
+   * Const.
+   * 
+   * Pre Conditions:
+   * None
+   * 
+   * Post Conditions:
+   * - Returns whether a given character acts as a separator.
    * 
    * @param character 
    */

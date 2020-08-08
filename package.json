@@ -13,7 +13,7 @@
         ]
     },
     "scripts": {
-        "test": "jest --runInBand --onlyChanged",
+        "test": "jest --runInBand",
         "build": "tsc -p .",
         "docs": "typedoc"
     },

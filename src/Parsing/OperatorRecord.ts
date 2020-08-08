@@ -18,7 +18,7 @@ export class OperatorRecord
    * Pre Conditions:
    * - Arity must be a non null positive integer.
    * - Operator position must be a positive integer.
-   * - Precedence must be an integer.
+   * - Precedence must be a positive integer.
    * - Operator position must be less or equal than arity.
    * 
    * @param arity

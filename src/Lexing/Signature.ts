@@ -6,4 +6,5 @@ import { TokenRecord } from "./TokenRecord";
 export interface Signature
 {
   getRecord(token : string) : TokenRecord;
+  hasRecord(token : string) : boolean;
 }

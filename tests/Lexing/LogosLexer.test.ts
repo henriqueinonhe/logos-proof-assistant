@@ -15,7 +15,7 @@ describe("lex()", () =>
   {
     test("Every non punctuation token must be present in the signature", () =>
     {
-      expect(() => lexer.lex("2", signature)).toThrow("no record associated with");
+      expect(() => lexer.lex("2", signature)).toThrow("is not present in the signature!");
     });
   });
 
