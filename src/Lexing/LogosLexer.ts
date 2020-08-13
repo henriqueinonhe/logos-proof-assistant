@@ -15,7 +15,8 @@ export class LogosLexer extends Lexer
   {
     const currentChar = string[currentIndex];
     if(currentChar === "(" ||
-       currentChar === ")")
+       currentChar === ")" ||
+       currentChar === ",")
     {
       const newIndex = currentIndex + 1;
       return [new Token(currentChar), newIndex];
@@ -90,6 +91,7 @@ export class LogosLexer extends Lexer
   {
     return character === "(" ||
            character === ")" ||
-           character === " ";
+           character === " " ||
+           character === ",";
   }
 }

@@ -1,7 +1,10 @@
 import { Signature } from "./Signature";
-import { PunctuationTokenRecord } from "./PunctuationTokenRecord";
 import { TokenRecord } from "./TokenRecord";
 import { InvalidArgumentException } from "../Utils/LogosUtils";
+import { LeftRoundBracketTokenRecord } from "./LeftRoundBracketTokenRecord";
+import { RightRoundBracketTokenRecord } from "./RightRoundBracketTokenRecord";
+import { WhitespaceTokenRecord } from "./WhitespaceTokenRecord";
+import { CommaTokenRecord } from "./CommaTokenRecord";
 
 export class LogosSignature implements Signature
 {
@@ -17,9 +20,10 @@ export class LogosSignature implements Signature
   constructor()
   {
     this.tokenRecords = new Map();
-    this.addRecord("(", new PunctuationTokenRecord());
-    this.addRecord(")", new PunctuationTokenRecord());
-    this.addRecord(" ", new PunctuationTokenRecord());
+    this.addRecord("(", new LeftRoundBracketTokenRecord());
+    this.addRecord(")", new RightRoundBracketTokenRecord());
+    this.addRecord(" ", new WhitespaceTokenRecord());
+    this.addRecord(",", new CommaTokenRecord());
   }
 
   /**

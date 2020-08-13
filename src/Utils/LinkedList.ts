@@ -136,7 +136,7 @@ export class LinkedListIterator<T>
   }
 
   /**
-   * Moves iterator to next element.
+   * Moves iterator to next element and returns it.
    * Non-const.
    * 
    * Pre Conditions:

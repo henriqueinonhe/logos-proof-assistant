@@ -35,5 +35,10 @@ describe("lex()", () =>
     {
       expect(lexer.lex("(0 0 1)1  1 1  11 0 0 ( )", signature).getTokenList().map(token => token.toString())).toStrictEqual(["(", "0", " ", "0", " ", "1", ")", "1", " ", "1", " ", "1", " ", "11", " ", "0", " ", "0", " ", "(", " ", ")"]);
     });
+
+    test("Commas are lexed correctly", () =>
+    {
+      expect(lexer.lex("0,1,1,1,,", signature).getTokenList().map(token => token.toString())).toStrictEqual(["0", ",", "1", ",", "1", ",", "1", ",", ","]);
+    });
   });
 });

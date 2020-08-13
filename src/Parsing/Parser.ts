@@ -12,10 +12,12 @@ export class TokenWrapper
   {
     this.token = token;
     this.correspondingInputTokenOffset = correspondingInputTokenOffset;
+    this.active = true;
   }
 
   public token : Token;
-  public correspondingInputTokenOffset : number;
+  public correspondingInputTokenOffset : number | undefined;
+  public active : boolean;
 }
 
 export class BracketWrapper extends TokenWrapper
@@ -44,19 +46,25 @@ export class Parser
   }
 
   /**
-   * //Motivation
+   * //What it does
    * This algorithm pre processes the token string so it can be further parsed
    * in linear time and handle error reporting gracefully.
    * 
    * Tokens are wrapped either using [[TokenWrapper]] class or, in case they are
    * a round brackets, using [[BracketWrapper]] and then put into a [[LinkedList]].
    * 
-   * A [[TokenWrapper]] is simply a token bundled with its corresponding 
-   * [[TokenString]] offset, so later when other tokens (mostly brackets) are 
-   * inserted/removes, if there is any error we can still point to the 
-   * tokens that caused the error in the input string itself, othwerise we would
-   * only be able to report errors based on a half processed string where tokens
-   * would possibly be out of their original position.
+   * A [[TokenWrapper]] is a token bundled with two additional properties:
+   * 
+   * 1. Its corresponding [[TokenString]] offset, so later when other tokens 
+   * (mostly brackets) are  inserted/removes, if there is any error we can still 
+   * point to the tokens that caused the error in the input string itself, 
+   * othwerise we would only be able to report errors based on a half processed 
+   * string where tokens would possibly be out of their original position.
+   * 2. An `active` flag that indicates whether a given token may act as an
+   * active operator and thus bind surrounding tokens as arguments to itself. 
+   * This is necessary to differentiate whether a given token (should it be an
+   * operator) is acting as an operator and thus will take arguments, or if
+   * it is acting as an operand and therefore should not perform argument binding.
    * 
    * A [[BracketWrapper]] is a subclass of a [[TokenWrapper]] and additionally
    * holds a [[LinkedListIterator]] that points to the matching [[BracketWrapper]],
@@ -84,7 +92,7 @@ export class Parser
    * tokens (like commas, for example) and so we need constant time insertion/
    * deletion to keep the parsing algorithm linear.
    * 
-   * //Algorithm
+   * //How it does
    * The algorithm both wraps tokens and matches brackets, while also collecting
    * umatched brackets for further error reporting.
    * 
@@ -171,6 +179,95 @@ export class Parser
     }
 
     return wrappedTokenList;
+  }
+
+  /**
+   * //What it does
+   * When performing mixfix operators' argument binding, operators
+   * must see function applications as a single "unit", which is very hard 
+   * to do in linear time using the unmodified syntax, as expressions like
+   * "f(a + b)(c + d) * 3" (curried functions) will make it hard for operators
+   * to understand whether a given bracketed expression is bound to the
+   * curried function application or should be bound to the operator itself.
+   * 
+   * A simple yet effective solution is to just add temporary special brackets 
+   * ("_(_" and "_)_") around function applications, so "f(a + b)(c + d) * 3"
+   *  will turn into "_(_f(a + b)(c + d)_)_ * 3".
+   * 
+   * Later these temporary brackets will be removed, so to speed up the process
+   * and avoid having to scan the whole string again, they
+   * will be referenced using iterators that will be held in an array.
+   * 
+   * Functional symbol identification is also a part of this process, so
+   * they will also be referenced using iterators for further processing.
+   * 
+   * And lastly we'll deactive single symbols that are arguments to functional
+   * applications, so when performing operator binding they won't be considered.
+   * 
+   * //How it does
+   * The string is scanned left to right, token by token, until control finds 
+   * a token that is declared as a functional symbol (in [[FunctionalSymbolsAndOperatorsTable]]),
+   * then it checks whether this functional symbol is part of a function application
+   * or is just being used as an argument to another function/operator.
+   * 
+   * To do so, it checks token *immediately* after the functional symbol:
+   * - If it is a left bracket, then it means we're dealing with a function
+   * application.
+   * - If it is *anything* else (including a whitespace) it means we're dealing
+   * with an argument.
+   * 
+   * If we're dealing with a function application, then we insert a special left bracket 
+   * right before the functional symbol and store an iterator to it in the 
+   * `functionApplicationOIsolatorBracketsIterators` array. We also store
+   * an interator to the functional symbol.
+   * 
+   * Then we keep on scanning in the context of ... //TODO Finish explanation
+   * 
+   * Right after this jump we can determine if we're dealing with a curried function
+   * application or not, which depends on the same criteria we used to determine
+   * whether we're dealing with a function application or not.
+   * 
+   * So we repeat this process until we find the last curried application
+   * (should it exist) and then we insert a right bracket, match it to the
+   * inserted left bracket and store an iterator pointing to it.
+   * 
+   * Rinse and repeat until end of string is reached.
+   * 
+   * @param wrappedTokenList 
+   */
+  // private static isolateFunctionalTerms(wrappedTokenList : WrappedTokenList, symbolTable : FunctionalSymbolsAndOperatorsTable) : [WrappedTokenList, Array<LinkedListIterator>, Array<LinkedListIterator>]
+  // {
+  //   const functionApplicationIsolatorBracketsIterators = [];
+  //   const functionalSymbolsIterators = [];
+  //   let currentTokenIterator = wrappedTokenList.iteratorAtHead();
+  //   let currentToken = currentTokenIterator.get();
+  //   while(true) //Change this later
+  //   {
+  //     const tokenIsFunctionalSymbol = symbolTable.tokenIsFunctionalSymbol(currentToken.toString());
+  //     if(tokenIsFunctionalSymbol)
+  //     {
+  //       //Start scanning function arguments
+  //       const iteratorAtFunctionalSymbol = currentTokenIterator;
+  //       const iteratorAtLeftBracket = iteratorAtFunctionalSymbol.clone().goToNext();
+  //       if(iteratorAtLeftBracket.isAtLast())
+  //       {
+
+  //       }
+  //     }
+  //   }
+
+      
+  // }
+
+  private static functionalSymbolIsPartOfFunctionApplication(iteratorToFunctionalSymbol : LinkedListIterator<TokenWrapper>) : boolean
+  {
+    if(iteratorToFunctionalSymbol.isAtLast())
+    {
+      return false;
+    }
+
+    const nextToken = iteratorToFunctionalSymbol.clone().goToNext().get(); //To avoid modifying original iterator
+    return nextToken.token.toString() === ")";
   }
 }
 

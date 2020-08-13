@@ -1,7 +1,7 @@
-import { PunctuationTokenRecord } from "../../src/Lexing/PunctuationTokenRecord";
 import { TypedTokenRecord } from "../../src/Lexing/TypedTokenRecord";
 import { Type } from "../../src/Type/Type";
 import { LogosSignature } from "../../src/Lexing/LogosSignature";
+import { WhitespaceTokenRecord } from "../../src/Lexing/WhitespaceTokenRecord";
 
 describe("constructor", () =>
 {
@@ -13,6 +13,7 @@ describe("constructor", () =>
       expect(signature["tokenRecords"].has("(")).toBe(true);
       expect(signature["tokenRecords"].has(")")).toBe(true);
       expect(signature["tokenRecords"].has(" ")).toBe(true);
+      expect(signature["tokenRecords"].has(",")).toBe(true);
     });
   });
 });
@@ -24,9 +25,9 @@ describe("addRecord()", () =>
     test("Token already associated with a record", () =>
     {
       const signature = new LogosSignature();
-      signature["tokenRecords"].set("<Whitespace>", new PunctuationTokenRecord());
+      signature["tokenRecords"].set("<Whitespace>", new WhitespaceTokenRecord());
 
-      expect(() => signature.addRecord("<Whitespace>", new PunctuationTokenRecord())).toThrow("record associated");
+      expect(() => signature.addRecord("<Whitespace>", new WhitespaceTokenRecord())).toThrow("record associated");
     });
   });
 
@@ -57,7 +58,7 @@ describe("removeRecord()", () =>
     test("Record is removed properly", () =>
     {
       const signature = new LogosSignature();
-      signature.addRecord("Dobs", new PunctuationTokenRecord());
+      signature.addRecord("Dobs", new WhitespaceTokenRecord());
       signature.removeRecord("Dobs");
       expect(signature["tokenRecords"].get("Dobs")).toBe(undefined);
     });
