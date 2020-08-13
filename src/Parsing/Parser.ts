@@ -181,84 +181,6 @@ export class Parser
     return wrappedTokenList;
   }
 
-  /**
-   * //What it does
-   * When performing mixfix operators' argument binding, operators
-   * must see function applications as a single "unit", which is very hard 
-   * to do in linear time using the unmodified syntax, as expressions like
-   * "f(a + b)(c + d) * 3" (curried functions) will make it hard for operators
-   * to understand whether a given bracketed expression is bound to the
-   * curried function application or should be bound to the operator itself.
-   * 
-   * A simple yet effective solution is to just add temporary special brackets 
-   * ("_(_" and "_)_") around function applications, so "f(a + b)(c + d) * 3"
-   *  will turn into "_(_f(a + b)(c + d)_)_ * 3".
-   * 
-   * Later these temporary brackets will be removed, so to speed up the process
-   * and avoid having to scan the whole string again, they
-   * will be referenced using iterators that will be held in an array.
-   * 
-   * Functional symbol identification is also a part of this process, so
-   * they will also be referenced using iterators for further processing.
-   * 
-   * And lastly we'll deactive single symbols that are arguments to functional
-   * applications, so when performing operator binding they won't be considered.
-   * 
-   * //How it does
-   * The string is scanned left to right, token by token, until control finds 
-   * a token that is declared as a functional symbol (in [[FunctionalSymbolsAndOperatorsTable]]),
-   * then it checks whether this functional symbol is part of a function application
-   * or is just being used as an argument to another function/operator.
-   * 
-   * To do so, it checks token *immediately* after the functional symbol:
-   * - If it is a left bracket, then it means we're dealing with a function
-   * application.
-   * - If it is *anything* else (including a whitespace) it means we're dealing
-   * with an argument.
-   * 
-   * If we're dealing with a function application, then we insert a special left bracket 
-   * right before the functional symbol and store an iterator to it in the 
-   * `functionApplicationOIsolatorBracketsIterators` array. We also store
-   * an interator to the functional symbol.
-   * 
-   * Then we keep on scanning in the context of ... //TODO Finish explanation
-   * 
-   * Right after this jump we can determine if we're dealing with a curried function
-   * application or not, which depends on the same criteria we used to determine
-   * whether we're dealing with a function application or not.
-   * 
-   * So we repeat this process until we find the last curried application
-   * (should it exist) and then we insert a right bracket, match it to the
-   * inserted left bracket and store an iterator pointing to it.
-   * 
-   * Rinse and repeat until end of string is reached.
-   * 
-   * @param wrappedTokenList 
-   */
-  // private static isolateFunctionalTerms(wrappedTokenList : WrappedTokenList, symbolTable : FunctionalSymbolsAndOperatorsTable) : [WrappedTokenList, Array<LinkedListIterator>, Array<LinkedListIterator>]
-  // {
-  //   const functionApplicationIsolatorBracketsIterators = [];
-  //   const functionalSymbolsIterators = [];
-  //   let currentTokenIterator = wrappedTokenList.iteratorAtHead();
-  //   let currentToken = currentTokenIterator.get();
-  //   while(true) //Change this later
-  //   {
-  //     const tokenIsFunctionalSymbol = symbolTable.tokenIsFunctionalSymbol(currentToken.toString());
-  //     if(tokenIsFunctionalSymbol)
-  //     {
-  //       //Start scanning function arguments
-  //       const iteratorAtFunctionalSymbol = currentTokenIterator;
-  //       const iteratorAtLeftBracket = iteratorAtFunctionalSymbol.clone().goToNext();
-  //       if(iteratorAtLeftBracket.isAtLast())
-  //       {
-
-  //       }
-  //     }
-  //   }
-
-      
-  // }
-
   private static functionalSymbolIsPartOfFunctionApplication(iteratorToFunctionalSymbol : LinkedListIterator<TokenWrapper>) : boolean
   {
     if(iteratorToFunctionalSymbol.isAtLast())
@@ -268,6 +190,67 @@ export class Parser
 
     const nextToken = iteratorToFunctionalSymbol.clone().goToNext().get(); //To avoid modifying original iterator
     return nextToken.token.toString() === ")";
+  }
+
+  private static ignoreWhitespace(iterator : LinkedListIterator<TokenWrapper>, signature : Signature) : LinkedListIterator<TokenWrapper>
+  {
+    while(true)
+    {
+      if(!iterator.isValid())
+      {
+        break;
+      }
+
+      const currentToken = iterator.get().toString();
+      const currentTokenSort = signature.getRecord(currentToken).sort();
+      if(currentTokenSort === "WhitespaceToken")
+      {
+        iterator.goToNext();
+      }
+      else
+      {
+        break;
+      }
+    }
+
+    return iterator;
+  }
+
+  private static checkExpectedToken(iteratorAtActualToken : LinkedListIterator<TokenWrapper>, signature : Signature, expectedTokenSortList : Array<string>) : void
+  {
+    const expectedTokenSortSet = new Set(expectedTokenSortList);
+    const errorSubMessage = this.craftExpectedTokenErrorSubMessage(expectedTokenSortList);
+    if(!iteratorAtActualToken.isValid())
+    {
+      throw new InvalidArgumentException("Premature end of string!");
+      //TODO Handle error with specialized exception indicating where the error has occurred!
+    }
+
+    const actualToken = iteratorAtActualToken.get();
+    const actualTokenSort = signature.getRecord(actualToken.toString()).sort();
+    if(!expectedTokenSortSet.has(actualTokenSort))
+    {
+      throw new InvalidArgumentException("Yada yada");
+      //TODO
+    }
+  }
+
+  private static craftExpectedTokenErrorSubMessage(expectedTokenSortList : Array<string>) : string
+  {
+    if(expectedTokenSortList.length === 1)
+    {
+      return `where a ${expectedTokenSortList[0]} was expected!`;
+    }
+    else
+    {
+      let string = "where a ";
+      for(let index = 0; index < expectedTokenSortList.length - 1; index++)
+      {
+        string += `${expectedTokenSortList[index]}, `;
+      }
+      string += `or a ${expectedTokenSortList[expectedTokenSortList.length - 1]} was expected!`;
+      return string;
+    }
   }
 }
 

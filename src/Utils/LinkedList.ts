@@ -119,18 +119,12 @@ export class LinkedListIterator<T>
    * Pre Conditions:
    * - Iterator must be in a valid state, that is, must be pointing
    * to an element.
-   * - There must be a previous element to go to.
    * 
    */
   public goToPrevious() : LinkedListIterator<T>
   {
     this.checkValidity();
     
-    if(this.node!.isHead())
-    {
-      throw new LogicErrorException("Cannot go to previous node as current node is head!");
-    }
-
     this.node = this.node!.previous as LinkedListNode<T>;
     return this;
   }
@@ -142,17 +136,11 @@ export class LinkedListIterator<T>
    * Pre Conditions:
    * - Iterator must be in a valid state, that is, must be pointing
    * to an element.
-   * - There must a next element to go to.
    * 
    */
   public goToNext() : LinkedListIterator<T>
   {
     this.checkValidity();
-
-    if(this.node!.isLast())
-    {
-      throw new LogicErrorException("Cannot go to next node as current node is last node!");
-    }
 
     this.node = this.node!.next as LinkedListNode<T>;
     return this;
@@ -392,7 +380,7 @@ export class LinkedList<T>
    */
   public iteratorAt(index : number) : LinkedListIterator<T>
   {
-    Utils.validateIndex(index, "index", this.length, "this");
+    Utils.validateIndex(index, "index", this.length + 1, "this"); //Considering one after last element
 
     const iterator = new LinkedListIterator<T>(this);
     for(let count = 0; count < index; count++)
@@ -413,6 +401,8 @@ export class LinkedList<T>
    */
   public at(index : number) : T
   {
+    Utils.validateIndex(index, "index", this.length, "this");
+
     const iterator = this.iteratorAt(index);
     return iterator.get();
   }
@@ -617,12 +607,11 @@ export class LinkedList<T>
   *[Symbol.iterator]() : Iterator<T>
   {
     const iterator = new LinkedListIterator(this);
-    while(!iterator.isAtLast())
+    while(iterator.isValid())
     {
       yield iterator.get();
       iterator.goToNext();
     }
-    yield iterator.get();
   }
 
   private head : LinkedListNode<T> | null;

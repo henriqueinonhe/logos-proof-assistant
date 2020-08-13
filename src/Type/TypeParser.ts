@@ -283,7 +283,7 @@ export class TypeParser
    * 
    * Syntax goes as follows (in PEG):
    * 
-   * <prod> ::= [ <expr>, <expr> (, <expr>+)]
+   * <prod> ::= [ <expr>, <expr> (, <expr>)*]
    * 
    * @param typeString 
    * @param passedIterator 
@@ -300,7 +300,7 @@ export class TypeParser
     let currentArgumentBeginOffset = leftSquareBracketOffset + 1;
     TypeParser.checkExpectedToken(typeString, currentArgumentBeginOffset, [TypeTokenSort.PrimitiveType, TypeTokenSort.LeftRoundBracket, TypeTokenSort.LeftSquareBracket]);
     let currentArgumentEndOffset;
-    let argumentCount = 0; //TODO Check number of arguments
+    let argumentCount = 0;
     while(true)
     {
       if(TypeParser.productTypeArgumentIsPrimitiveType(typeString, currentArgumentBeginOffset))
@@ -416,7 +416,7 @@ export class TypeParser
                                     expectedTokenSortArray : Array<TypeTokenSort>) : void
   {
     const expectedTokenSortSet = new Set(expectedTokenSortArray);
-    const errorSubMessage = TypeParser.craftExpectedTokensSubMessage(expectedTokenSortArray);
+    const errorSubMessage = TypeParser.craftExpectedTokenErrorSubMessage(expectedTokenSortArray);
     if(actualTokenOffset >= typeString.size())
     {
       throw new ParsingException(`Premature end of string ${errorSubMessage}`, 0, typeString.size() - 1, typeString);
@@ -432,7 +432,7 @@ export class TypeParser
    * 
    * @param expectedTokenSortArray 
    */
-  private static craftExpectedTokensSubMessage(expectedTokenSortArray : Array<TypeTokenSort>) : string
+  private static craftExpectedTokenErrorSubMessage(expectedTokenSortArray : Array<TypeTokenSort>) : string
   {
     const convertTokenSortToToken = (sort : TypeTokenSort) : string =>
     {

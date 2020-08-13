@@ -98,13 +98,6 @@ describe("goToPrevious()", () =>
       iterator["node"] = null;
       expect(() => iterator.goToPrevious()).toThrow("Iterator is invalid!");
     });
-
-    test("Iterator must not be pointing at head", () =>
-    {
-      const list = new LinkedList<number>(10);
-      const iterator = new LinkedListIterator<number>(list);
-      expect(() => iterator.goToPrevious()).toThrow("is head!");
-    });
   });
 
   describe("Post Conditions", () =>
@@ -130,13 +123,6 @@ describe("goToNext()", () =>
       const iterator = new LinkedListIterator<number>(list);
       iterator["node"] = null;
       expect(() => iterator.goToNext()).toThrow("Iterator is invalid!");
-    });
-
-    test("Iterator must not be pointing at last", () =>
-    {
-      const list = new LinkedList<number>(10);
-      const iterator = new LinkedListIterator<number>(list);
-      expect(() => iterator.goToNext()).toThrow("is last");
     });
   });
 
@@ -462,7 +448,7 @@ describe("iteratorAt()", () =>
     test("Index must be within bounds", () =>
     {
       const list = new LinkedList(10);
-      expect(() => list.iteratorAt(1)).toThrow("associated with");
+      expect(() => list.iteratorAt(2)).toThrow("associated with");
     });
   });
 
@@ -487,7 +473,7 @@ describe("at()", () =>
     test("Index must be within bounds", () =>
     {
       const list = new LinkedList(10);
-      expect(() => list.at(1)).toThrow("associated with");
+      expect(() => list.at(2)).toThrow("associated with");
     });
   });
 
