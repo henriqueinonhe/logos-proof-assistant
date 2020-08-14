@@ -210,6 +210,17 @@ export class LinkedListIterator<T>
     return this.isValid() && this.node!.isLast();
   }
 
+  /**
+   * Returns list iterator is associated with.
+   * 
+   * Pre Conditions:
+   * None
+   */
+  public getList() : LinkedList<T>
+  {
+    return this.list;
+  }
+
   private list : LinkedList<T>;
   private node : LinkedListNode<T> | null;
 }
@@ -612,6 +623,41 @@ export class LinkedList<T>
       yield iterator.get();
       iterator.goToNext();
     }
+  }
+
+  //DOCUMENT AND TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+  public clone() : LinkedList<T>
+  {
+    const clonedList = new LinkedList<T>();
+    for(const element of this)
+    {
+      clonedList.push(element);
+    }
+    return clonedList;
+  }
+
+  public map<MappedType>(callback : (element : T, index ?: number, list ?: LinkedList<T>) => MappedType) : LinkedList<MappedType>
+  {
+    const mappedList = new LinkedList<MappedType>();
+    let index = 0;
+    for(const element of this)
+    {
+      mappedList.push(callback(element, index, this));
+      index++;
+    }
+    return mappedList;
+  }
+
+  public toArray() : Array<T>
+  {
+    const array = [];
+    for(const element of this)
+    {
+      array.push(element);
+    }
+    return array;
   }
 
   private head : LinkedListNode<T> | null;

@@ -16,38 +16,16 @@ export class LogosLexer extends Lexer
     const currentChar = string[currentIndex];
     if(currentChar === "(" ||
        currentChar === ")" ||
-       currentChar === ",")
+       currentChar === "," ||
+       currentChar === " ")
     {
       const newIndex = currentIndex + 1;
       return [new Token(currentChar), newIndex];
-    }
-    else if(currentChar === " ")
-    {
-      return this.lexWhitespace(string, currentIndex);
     }
     else
     {
       return this.lexNonPunctuationToken(string, currentIndex);
     }
-  }
-
-  /**
-   * Lexes whitespace substring and returns the index to a character after
-   * the substring.
-   * 
-   * @param string 
-   * @param startIndex 
-   */
-  private lexWhitespace(string : string, startIndex : number) : [Token, number]
-  {
-    //Finds end of whitespace-only substring
-    let index = startIndex;
-    while(index < string.length && string[index] === " ")
-    {
-      index++;
-    }
-    
-    return [new Token(" "), index];
   }
 
   /**

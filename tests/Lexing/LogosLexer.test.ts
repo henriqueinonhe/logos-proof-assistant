@@ -28,12 +28,12 @@ describe("lex()", () =>
 
     test("Whitespace is lexed correctly", () =>
     {
-      expect(lexer.lex("   (      )   ", signature).getTokenList().map(token => token.toString())).toStrictEqual([" ", "(", " ", ")", " "]);
+      expect(lexer.lex("   (      )   ", signature).getTokenList().map(token => token.toString())).toStrictEqual([" ", " ", " ", "(", " ", " ", " ", " ", " ", " ", ")", " ", " ", " "]);
     });
 
     test("Non punctuation tokens are lexed correctly", () =>
     {
-      expect(lexer.lex("(0 0 1)1  1 1  11 0 0 ( )", signature).getTokenList().map(token => token.toString())).toStrictEqual(["(", "0", " ", "0", " ", "1", ")", "1", " ", "1", " ", "1", " ", "11", " ", "0", " ", "0", " ", "(", " ", ")"]);
+      expect(lexer.lex("(0 0 1)1 1 1 11 0 0 ( )", signature).getTokenList().map(token => token.toString())).toStrictEqual(["(", "0", " ", "0", " ", "1", ")", "1", " ", "1", " ", "1", " ", "11", " ", "0", " ", "0", " ", "(", " ", ")"]);
     });
 
     test("Commas are lexed correctly", () =>

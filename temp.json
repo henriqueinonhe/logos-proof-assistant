@@ -1,0 +1,35 @@
+[
+  [
+    {
+      "substring": "f(1, f(0))",
+      "substringBeginOffset": 0,
+      "substringEndOffset": 9,
+      "children": [
+        [
+          {
+            "substring": "f",
+            "substringBeginOffset": 0,
+            "substringEndOffset": 0,
+            "children": []
+          }
+        ],
+        [
+          {
+            "substring": "1",
+            "substringBeginOffset": 2,
+            "substringEndOffset": 2,
+            "children": []
+          }
+        ],
+        [
+          {
+            "substring": " f(0)",
+            "substringBeginOffset": 4,
+            "substringEndOffset": 8,
+            "children": []
+          }
+        ]
+      ]
+    }
+  ]
+]
