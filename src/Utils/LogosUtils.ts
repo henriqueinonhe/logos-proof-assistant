@@ -84,7 +84,7 @@ export class Utils
 /**
  * Interface that represents cloneable objects. (Deep copy).
  */
-interface Cloneable<T>
+export interface Cloneable<T>
 {
   clone() : T;
 }

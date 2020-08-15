@@ -1,35 +1,73 @@
 [
-  [
-    {
-      "substring": "f(1, f(0))",
-      "substringBeginOffset": 0,
-      "substringEndOffset": 9,
-      "children": [
-        [
-          {
-            "substring": "f",
-            "substringBeginOffset": 0,
-            "substringEndOffset": 0,
-            "children": []
-          }
-        ],
-        [
-          {
-            "substring": "1",
-            "substringBeginOffset": 2,
-            "substringEndOffset": 2,
-            "children": []
-          }
-        ],
-        [
-          {
-            "substring": " f(0)",
-            "substringBeginOffset": 4,
-            "substringEndOffset": 8,
-            "children": []
-          }
-        ]
+  {
+    "substring": "f(1)",
+    "substringBeginOffset": 0,
+    "substringEndOffset": 3,
+    "children": [
+      [
+        {
+          "substring": "f",
+          "substringBeginOffset": 0,
+          "substringEndOffset": 0,
+          "children": []
+        }
+      ],
+      [
+        {
+          "substring": "1",
+          "substringBeginOffset": 2,
+          "substringEndOffset": 2,
+          "children": []
+        }
       ]
-    }
-  ]
+    ]
+  },
+  {
+    "substring": " ",
+    "substringBeginOffset": 4,
+    "substringEndOffset": 4,
+    "children": []
+  },
+  {
+    "substring": "(",
+    "substringBeginOffset": 5,
+    "substringEndOffset": 5,
+    "children": []
+  },
+  {
+    "substring": "0",
+    "substringBeginOffset": 6,
+    "substringEndOffset": 6,
+    "children": []
+  },
+  {
+    "substring": ")",
+    "substringBeginOffset": 7,
+    "substringEndOffset": 7,
+    "children": []
+  },
+  {
+    "substring": " ",
+    "substringBeginOffset": 8,
+    "substringEndOffset": 8,
+    "children": []
+  },
+  {
+    "substring": "(",
+    "substringBeginOffset": 9,
+    "substringEndOffset": 9,
+    "children": []
+  },
+  {
+    "substring": "1",
+    "substringBeginOffset": 10,
+    "substringEndOffset": 10,
+    "children": []
+  },
+  {
+    "substring": ")",
+    "substringBeginOffset": 11,
+    "substringEndOffset": 11,
+    "children": []
+  }
 ]

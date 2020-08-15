@@ -2,3 +2,7 @@ node_modules
 build
 coverage
 docs
+.VSCodeCounter/details.md
+.VSCodeCounter/results.csv
+.VSCodeCounter/results.md
+.VSCodeCounter/results.txt

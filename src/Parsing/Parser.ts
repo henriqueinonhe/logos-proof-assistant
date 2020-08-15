@@ -175,20 +175,20 @@ export class Parser
    */
   private static reduceFunctionApplications(tokenNodeList : LinkedList<ParseTreeNode>, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable, inputTokenString : TokenString) : void
   {
-    let currentTokenNodeIterator = tokenNodeList.iteratorAtHead();
-    let currentTokenNodeIteratorIsAtAfterLastToken = currentTokenNodeIterator.isValid(); //
-    while(currentTokenNodeIteratorIsAtAfterLastToken)
+    let currentNodeIterator = tokenNodeList.iteratorAtHead();
+    let nodeListEndHasBeenReached = !currentNodeIterator.isValid(); //
+    while(!nodeListEndHasBeenReached)
     {
-      if(Parser.iteratorIsAtFunctionApplicationStartingPoint(currentTokenNodeIterator, symbolTable))
+      if(Parser.iteratorIsAtFunctionApplicationStartingPoint(currentNodeIterator, symbolTable))
       {
-        currentTokenNodeIterator = Parser.parseFunctionApplication(currentTokenNodeIterator, signature, symbolTable, inputTokenString);
-      }
-      else
-      {
-        currentTokenNodeIterator = currentTokenNodeIterator.goToNext();
+        const iteratorAtFunctionalSymbol = currentNodeIterator;
+        const iteratorAtFunctionApplicationReducedNode = Parser.reduceSingleFunctionApplication(iteratorAtFunctionalSymbol, signature, symbolTable, inputTokenString);
+        currentNodeIterator = iteratorAtFunctionApplicationReducedNode;
       }
 
-      currentTokenNodeIteratorIsAtAfterLastToken = currentTokenNodeIterator.isValid();
+      currentNodeIterator = currentNodeIterator.goToNext();
+
+      nodeListEndHasBeenReached = !currentNodeIterator.isValid();
     }
   }
 
@@ -205,20 +205,20 @@ export class Parser
    */
   private static iteratorIsAtFunctionApplicationStartingPoint(iterator : LinkedListIterator<ParseTreeNode>, symbolTable : FunctionalSymbolsAndOperatorsTable) : boolean
   {
-    const currentTokenNode = iterator.get();
-    const currentToken = currentTokenNode.getCorrespondingInputSubstring().toString();
+    const currentNode = iterator.get();
+    const currentToken = currentNode.getCorrespondingInputSubstring().toString();
     if(!symbolTable.tokenIsFunctionalSymbol(currentToken))
     {
       return false;
     }
 
-    const iteratorToFunctionalSymbolNode = iterator;
-    if(iteratorToFunctionalSymbolNode.isAtLast())
+    const iteratorAtFunctionalSymbol = iterator;
+    if(iteratorAtFunctionalSymbol.isAtLast())
     {
       return false;
     }
 
-    const nextToken = iteratorToFunctionalSymbolNode.clone().goToNext().get(); //To avoid modifying original iterator
+    const nextToken = iteratorAtFunctionalSymbol.clone().goToNext().get(); //To avoid modifying original iterator
     return nextToken.getCorrespondingInputSubstring().toString() === "(";
   }
 
@@ -230,149 +230,144 @@ export class Parser
    * @param symbolTable 
    * @param inputTokenString 
    */
-  private static parseFunctionApplication(iteratorAtFunctionalSymbol : LinkedListIterator<ParseTreeNode>, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable, inputTokenString : TokenString) : LinkedListIterator<ParseTreeNode>
+  private static reduceSingleFunctionApplication(iteratorAtFunctionalSymbol : LinkedListIterator<ParseTreeNode>, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable, inputTokenString : TokenString) : LinkedListIterator<ParseTreeNode>
   {
     let topLevelFunctionApplicationReducedNode = new ParseTreeNode(inputTokenString);
 
     //Append Function Symbol Node
-    const topLevelFunctionalSymbolNode = iteratorAtFunctionalSymbol.get();
-    const functionalSymbolNode = new ParseTreeNode(inputTokenString, topLevelFunctionalSymbolNode.substringBeginOffset, topLevelFunctionalSymbolNode.substringEndOffset);
+    const functionalSymbolNode = iteratorAtFunctionalSymbol.get();
     const listWrappedFunctionalSymbolNode = new LinkedList<ParseTreeNode>(functionalSymbolNode);
     topLevelFunctionApplicationReducedNode.children.push(listWrappedFunctionalSymbolNode);
     
-    //Parse First Argument List (Mandatory)
-    const iteratorAtFirstArgumentOpeningLeftBracketNode = iteratorAtFunctionalSymbol.clone().goToNext();
-    let [iteratorAtArgumentListEnd, listWrappedArgumentNodeList] = Parser.parseFunctionArgumentList(iteratorAtFirstArgumentOpeningLeftBracketNode, signature, symbolTable, inputTokenString);
-
-    //Append Argument Nodes
-    for(const argumentNode of listWrappedArgumentNodeList)
-    {
-      topLevelFunctionApplicationReducedNode.children.push(argumentNode);
-    }
-
-    //Set First Application Offsets
-    const lastListWrappedArgumentNodeIndex = listWrappedArgumentNodeList.length - 1;
-    const lastListWrappedArgumentNode = listWrappedArgumentNodeList[lastListWrappedArgumentNodeIndex];
-    const lastArgumentLastToken = lastListWrappedArgumentNode.atLast();
-    const lastArgumentEndOffset = lastArgumentLastToken.substringEndOffset;
-    const argumentListClosingBracketOffset = lastArgumentEndOffset as number + 1;
-    topLevelFunctionApplicationReducedNode.substringBeginOffset = topLevelFunctionalSymbolNode.substringBeginOffset;
-    topLevelFunctionApplicationReducedNode.substringEndOffset = argumentListClosingBracketOffset;
-
-    while(Parser.hasNextArgumentList(iteratorAtArgumentListEnd))
-    {
-      //Parse Argument List
-      [iteratorAtArgumentListEnd, listWrappedArgumentNodeList] = Parser.parseFunctionArgumentList(iteratorAtArgumentListEnd, signature, symbolTable, inputTokenString);
-
-      //Rearrange Tree
-      const formerTopLevelFunctionApplicationNode = topLevelFunctionApplicationReducedNode;
-      const formerTopLevelFunctionApplicationNodeBeginOffset = topLevelFunctionApplicationReducedNode.substringBeginOffset;
-      const lastArgumentEndOffset = listWrappedArgumentNodeList[listWrappedArgumentNodeList.length - 1].atHead().substringEndOffset;
-      topLevelFunctionApplicationReducedNode = new ParseTreeNode(inputTokenString, formerTopLevelFunctionApplicationNodeBeginOffset, lastArgumentEndOffset);
-
-      //Append Argument Nodes
-      topLevelFunctionApplicationReducedNode.children.push(new LinkedList(formerTopLevelFunctionApplicationNode));
-      for(const listWrappedArgumentNode of listWrappedArgumentNodeList)
-      {
-        topLevelFunctionApplicationReducedNode.children.push(listWrappedArgumentNode);
-      }
-    }
-
-    //Remove Scanned Tokens and Substitute By top level function application node
-    //Maybe this should be moved to upper function
-    const topLevelTokenNodeList = iteratorAtFunctionalSymbol.getList();
-    const functionApplicationEndIterator = iteratorAtArgumentListEnd.clone();
-    topLevelTokenNodeList.insertBefore(iteratorAtFunctionalSymbol, topLevelFunctionApplicationReducedNode);
-
-    const afterFunctionApplicationEndIterator = functionApplicationEndIterator.clone().goToNext();
-    Parser.removeNodesFromList(iteratorAtFunctionalSymbol.getList(), iteratorAtFunctionalSymbol, afterFunctionApplicationEndIterator);
-    return afterFunctionApplicationEndIterator.clone();
-  }
-
-  private static parseFunctionArgumentList(iteratorAtOpeningLeftBracketNode : LinkedListIterator<ParseTreeNode>, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable, inputTokenString : TokenString) : [LinkedListIterator<ParseTreeNode>, Array<LinkedList<ParseTreeNode>>]
-  {
-    const argumentList = [];
-    const iteratorAtArgumentListFirstTokenNode = iteratorAtOpeningLeftBracketNode.clone().goToNext();
-    let iteratorAtCurrentTokenNode = iteratorAtArgumentListFirstTokenNode.clone();
-    let currentArgumentNodeList;
-
-    //First Argument is Mandatory
-    let iteratorAtArgumentFirstTokenNode = iteratorAtArgumentListFirstTokenNode.goToNext();
+    let isFirstArgumentList = true;
+    let iteratorAtCurrentArgumentListOpeningBracket;
+    let iteratorAtCurrentArgumentListClosingBracket = iteratorAtFunctionalSymbol.clone(); //Language Abuse
     
+    //First Argument List Is Presence Mandatory
     do
     {
-      [iteratorAtCurrentTokenNode, currentArgumentNodeList] = Parser.parseFunctionArgument(iteratorAtArgumentFirstTokenNode, signature, symbolTable, inputTokenString);
-      argumentList.push(currentArgumentNodeList);
-      iteratorAtArgumentFirstTokenNode = iteratorAtCurrentTokenNode;
-    } while(Parser.hasNextArgument(iteratorAtArgumentFirstTokenNode));
+      iteratorAtCurrentArgumentListOpeningBracket = iteratorAtCurrentArgumentListClosingBracket.clone().goToNext();
+      const parseFunctionArgumentListReturnValues = Parser.parseFunctionArgumentList(iteratorAtCurrentArgumentListOpeningBracket, signature, symbolTable, inputTokenString);
+      [iteratorAtCurrentArgumentListClosingBracket] = parseFunctionArgumentListReturnValues;
+      const [, argumentNodeListArray] = parseFunctionArgumentListReturnValues;
 
-    return [iteratorAtCurrentTokenNode, argumentList];
-  }
-
-  private static parseFunctionArgument(iteratorAtArgumentBeginning : LinkedListIterator<ParseTreeNode>, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable, inputTokenString : TokenString) : [LinkedListIterator<ParseTreeNode>, LinkedList<ParseTreeNode>]
-  {
-    let iteratorAtCurrentTokenNode = iteratorAtArgumentBeginning.clone();
-    let significantTokenCounter = 0;
-    //First Significant Token
-    iteratorAtCurrentTokenNode = Parser.ignoreWhitespace(iteratorAtCurrentTokenNode, signature);
-    Parser.checkExpectedToken(iteratorAtCurrentTokenNode, signature, ["TypedToken", "VariableToken", "VariableBindingToken", "LeftRoundBracketToken"]);
-    significantTokenCounter++;
-
-    if(Parser.iteratorIsAtFunctionApplicationStartingPoint(iteratorAtCurrentTokenNode, symbolTable))
-    {
-      iteratorAtCurrentTokenNode = Parser.parseFunctionApplication(iteratorAtCurrentTokenNode, signature, symbolTable, inputTokenString);
-      //How does the top node incorporates this resulting node?
-    }
-    else
-    {
-      iteratorAtCurrentTokenNode = iteratorAtCurrentTokenNode.goToNext();
-    }
-
-    //Rest of significant tokens
-    while(true)
-    {
-      iteratorAtCurrentTokenNode = Parser.ignoreWhitespace(iteratorAtCurrentTokenNode, signature);
-      Parser.checkExpectedToken(iteratorAtCurrentTokenNode, signature, ["TypedToken", "VariableToken", "VariableBindingToken", "LeftRoundBracketToken", "CommaToken", "RightRoundBracketToken"]);
-
-      const currentToken = iteratorAtCurrentTokenNode.get().getCorrespondingInputSubstring().toString();
-      const currentArgumentHasEnded = currentToken === "," || currentToken === ")";
-      if(currentArgumentHasEnded)
+      if(isFirstArgumentList)
       {
-        const argumentBeginOffset = iteratorAtArgumentFirstTokenNode.get().substringBeginOffset;
-        const oneBeforeArgumentSeparatorOffset = iteratorAtCurrentTokenNode.get().substringEndOffset as number - 1;
-        //Fill Argument Node List
-        const argumentEndOffset = oneBeforeArgumentSeparatorOffset;
-        argumentNodeList.push(new ParseTreeNode(inputTokenString, argumentBeginOffset, argumentEndOffset));
-        break;
-      }
-
-      if(Parser.iteratorIsAtFunctionApplicationStartingPoint(iteratorAtCurrentTokenNode, symbolTable))
-      {
-        iteratorAtCurrentTokenNode = Parser.parseFunctionApplication(iteratorAtCurrentTokenNode, signature, symbolTable, inputTokenString);
+        //Set First Function Application Offsets
+        const argumentListClosingBracketOffset = iteratorAtCurrentArgumentListClosingBracket.get().substringEndOffset;
+  
+        topLevelFunctionApplicationReducedNode.substringBeginOffset = functionalSymbolNode.substringBeginOffset;
+        topLevelFunctionApplicationReducedNode.substringEndOffset = argumentListClosingBracketOffset;
+  
+        isFirstArgumentList = false;
       }
       else
       {
-        iteratorAtCurrentTokenNode = iteratorAtCurrentTokenNode.goToNext();
+        //Rearrange Tree
+        const formerTopLevelFunctionApplicationReducedNode = topLevelFunctionApplicationReducedNode;
+        const formerTopLevelFunctionApplicationReducedNodeBeginOffset = topLevelFunctionApplicationReducedNode.substringBeginOffset;
+        const argumentListClosingBracketOffset = iteratorAtCurrentArgumentListClosingBracket.get().substringEndOffset;
+
+        topLevelFunctionApplicationReducedNode = new ParseTreeNode(inputTokenString, formerTopLevelFunctionApplicationReducedNodeBeginOffset, argumentListClosingBracketOffset);
+        topLevelFunctionApplicationReducedNode.children.push(new LinkedList(formerTopLevelFunctionApplicationReducedNode));
       }
-      significantTokenCounter++;
+
+      //Append Arguments
+      for(const argumentNodeList of argumentNodeListArray)
+      {
+        topLevelFunctionApplicationReducedNode.children.push(argumentNodeList);
+      }
+    } while(Parser.hasNextArgumentList(iteratorAtCurrentArgumentListClosingBracket));
+
+
+
+    //Remove Scanned Tokens and Substitute By top level function application node
+    const topLevelTokenNodeList = iteratorAtFunctionalSymbol.getList();
+    const iteratorAtFunctionApplicationEnd = iteratorAtCurrentArgumentListClosingBracket.clone();
+    const iteratorAtFunctionApplicationReducedNode = topLevelTokenNodeList.insertBefore(iteratorAtFunctionalSymbol, topLevelFunctionApplicationReducedNode);
+
+    const iteratorAtAfterFunctionApplicationEnd = iteratorAtFunctionApplicationEnd.clone().goToNext();
+    Parser.removeNodesFromList(iteratorAtFunctionalSymbol.getList(), iteratorAtFunctionalSymbol, iteratorAtAfterFunctionApplicationEnd);
+    return iteratorAtFunctionApplicationReducedNode;
+  }
+
+  private static parseFunctionArgumentList(iteratorAtOpeningLeftBracket : LinkedListIterator<ParseTreeNode>, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable, inputTokenString : TokenString) : [LinkedListIterator<ParseTreeNode>, Array<LinkedList<ParseTreeNode>>]
+  {
+    const argumentNodeListArray = [];
+    let iteratorAtCurrentArgumentFirstNode;
+    let iteratorAtCurrentArgumentSeparator = iteratorAtOpeningLeftBracket;
+
+    do
+    {
+      iteratorAtCurrentArgumentFirstNode = iteratorAtCurrentArgumentSeparator.goToNext();
+
+      const parseFunctionArgumentReturnValue = Parser.parseFunctionArgument(iteratorAtCurrentArgumentFirstNode, signature, symbolTable, inputTokenString);
+      [iteratorAtCurrentArgumentSeparator] = parseFunctionArgumentReturnValue;
+      const [, currentArgumentNodeList] = parseFunctionArgumentReturnValue;
+
+      argumentNodeListArray.push(currentArgumentNodeList);
+
+    } while(Parser.hasNextArgument(iteratorAtCurrentArgumentSeparator));
+
+    const iteratorAtArgumentListClosingBracket = iteratorAtCurrentArgumentSeparator.clone();
+    return [iteratorAtArgumentListClosingBracket, argumentNodeListArray];
+  }
+
+  private static parseFunctionArgument(iteratorAtArgumentFirstNode : LinkedListIterator<ParseTreeNode>, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable, inputTokenString : TokenString) : [LinkedListIterator<ParseTreeNode>, LinkedList<ParseTreeNode>]
+  {
+    const argumentNodeList = new LinkedList<ParseTreeNode>();
+    let iteratorAtCurrentNode = iteratorAtArgumentFirstNode.clone();
+
+    //Remove Leading Whitespace
+    iteratorAtCurrentNode = Parser.ignoreWhitespace(iteratorAtCurrentNode, signature);
+    //First Significant Token Is Mandatory
+    Parser.checkExpectedToken(iteratorAtCurrentNode, signature, ["TypedToken", "VariableToken", "VariableBindingToken", "LeftRoundBracketToken"]);
+
+    if(Parser.iteratorIsAtFunctionApplicationStartingPoint(iteratorAtCurrentNode, symbolTable))
+    {
+      iteratorAtCurrentNode = Parser.reduceSingleFunctionApplication(iteratorAtCurrentNode, signature, symbolTable, inputTokenString);
+    }
+    argumentNodeList.push(iteratorAtCurrentNode.get());
+    iteratorAtCurrentNode = iteratorAtCurrentNode.goToNext();
+    // iteratorAtCurrentNode = Parser.ignoreWhitespace(iteratorAtCurrentNode, signature);
+
+    while(!Parser.functionArgumentHasFinished(iteratorAtCurrentNode))
+    {
+      Parser.checkExpectedToken(iteratorAtCurrentNode, signature, ["TypedToken", "VariableToken", "VariableBindingToken", "LeftRoundBracketToken", "WhitespaceToken"]);
+      
+      if(Parser.iteratorIsAtFunctionApplicationStartingPoint(iteratorAtCurrentNode, symbolTable))
+      {
+        iteratorAtCurrentNode = Parser.reduceSingleFunctionApplication(iteratorAtCurrentNode, signature, symbolTable, inputTokenString);
+      }
+      
+      argumentNodeList.push(iteratorAtCurrentNode.get());
+      iteratorAtCurrentNode = iteratorAtCurrentNode.goToNext();
+      // iteratorAtCurrentNode = Parser.ignoreWhitespace(iteratorAtCurrentNode, signature);
     }
 
-    const currentToken = iteratorAtCurrentTokenNode.get().getCorrespondingInputSubstring().toString();
-    const currentArgumentListHasEnded = currentToken === ")";
-    if(currentArgumentListHasEnded)
+    Parser.removeArgumentNodeListTrailingWhitespace(argumentNodeList);
+    const iteratorAtArgumentSeparator = iteratorAtCurrentNode;
+    return [iteratorAtArgumentSeparator, argumentNodeList];
+  }
+
+  private static removeArgumentNodeListTrailingWhitespace(argumentNodeList : LinkedList<ParseTreeNode>) : void
+  {
+    while(argumentNodeList.atLast().getCorrespondingInputSubstring().toString() === " ")
     {
-      break;
-    }
-    else
-    {
-      iteratorAtCurrentTokenNode = iteratorAtCurrentTokenNode.goToNext();
-      iteratorAtArgumentFirstTokenNode = iteratorAtCurrentTokenNode.clone();
+      argumentNodeList.pop();
     }
   }
 
-  private static hasNextArgument(iteratorAtPreviousArgumentEnd : LinkedListIterator<ParseTreeNode>) : boolean
+  private static functionArgumentHasFinished(iterator : LinkedListIterator<ParseTreeNode>) : boolean
   {
-    const iteratorAtPossibleComma = iteratorAtPreviousArgumentEnd.clone().goToNext();
+    const currentToken = iterator.get().getCorrespondingInputSubstring().toString();
+    return currentToken === "," ||
+           currentToken === ")";
+  }
+
+  private static hasNextArgument(iteratorAtArgumentSeparator : LinkedListIterator<ParseTreeNode>) : boolean
+  {
+    const iteratorAtPossibleComma = iteratorAtArgumentSeparator.clone();
     return iteratorAtPossibleComma.isValid() && iteratorAtPossibleComma.get().getCorrespondingInputSubstring().toString() === ",";
   }
 
@@ -384,13 +379,8 @@ export class Parser
 
   private static ignoreWhitespace(iterator : LinkedListIterator<ParseTreeNode>, signature : Signature) : LinkedListIterator<ParseTreeNode>
   {
-    while(true)
+    while(iterator.isValid())
     {
-      if(!iterator.isValid())
-      {
-        break;
-      }
-
       const currentToken = iterator.get().getCorrespondingInputSubstring().toString();
       const currentTokenSort = signature.getRecord(currentToken).sort();
       if(currentTokenSort === "WhitespaceToken")

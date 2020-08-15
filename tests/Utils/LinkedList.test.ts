@@ -738,3 +738,34 @@ describe("Iterator Protocol", () =>
     expect(numbers).toStrictEqual([10, 20, 30, 40]);
   });
 });
+
+// describe("clone", () =>
+// {
+//   describe("Post Conditions", () =>
+//   {
+//     test("List is cloned properly", () =>
+//     {
+//       const original = new LinkedList(10);
+//       original.push(20);
+//       original.push(30);
+
+//       const clone = original.clone();
+
+//       for(let index = 0; index < original.size(); index++)
+//       {
+//         expect(original.at(index)).toBe(clone.at(index));
+//       }
+
+//       expect(original).not.toBe(clone);
+//     });
+
+//     test("Modifying clone doesn't affect original", () =>
+//     {
+//       const original = new LinkedList({a : 10});
+//       original.push({a : 20});
+//       original.push({a : 30});
+
+//       const clone = original.clone();
+//     });
+//   });
+// });

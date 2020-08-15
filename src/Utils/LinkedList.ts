@@ -1,4 +1,5 @@
 import { LogicErrorException, Utils } from "./LogosUtils";
+import { Cloneable } from "./LogosUtils";
 
 /**
  * Represents a linked list node.
@@ -625,18 +626,23 @@ export class LinkedList<T>
     }
   }
 
-  //DOCUMENT AND TEST!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-
-  public clone() : LinkedList<T>
-  {
-    const clonedList = new LinkedList<T>();
-    for(const element of this)
-    {
-      clonedList.push(element);
-    }
-    return clonedList;
-  }
+  /**
+   * Deep Copy
+   * Const.
+   * 
+   * Pre Conditions:
+   * None
+   * 
+   */
+  // public clone() : LinkedList<T>
+  // {
+  //   const clonedList = new LinkedList<T>();
+  //   for(const element of this)
+  //   {
+  //     clonedList.push(element); //This is an issue! Element must be cloneable!
+  //   }
+  //   return clonedList;
+  // }
 
   public map<MappedType>(callback : (element : T, index ?: number, list ?: LinkedList<T>) => MappedType) : LinkedList<MappedType>
   {
@@ -650,6 +656,13 @@ export class LinkedList<T>
     return mappedList;
   }
 
+  /**
+   * Shallow copy of the list to an array.
+   * Const.
+   * 
+   * Pre Conditions: 
+   * None
+   */
   public toArray() : Array<T>
   {
     const array = [];

@@ -18,7 +18,7 @@ signature.addRecord("f", new TypedTokenRecord(new Type("i->i")));
 signature.addRecord("+", new TypedTokenRecord(new Type("[i,i]->i")));
 const symbolTable = new FunctionalSymbolsAndOperatorsTable();
 symbolTable.addFunctionalSymbol("f");
-Parser.parse("f(1, f(0))", lexer, signature, symbolTable);
+Parser.parse("f(1) (0) (1)", lexer, signature, symbolTable);
 
 describe("private convertTokenStringToNodeListAndHandleBrackets()", () =>
 {
@@ -133,8 +133,8 @@ describe("private proccessFunctionApplicatons()", () =>
             ],
             [
               {
-                "substring": " 1",
-                "substringBeginOffset": 2,
+                "substring": "1",
+                "substringBeginOffset": 3,
                 "substringEndOffset": 3,
                 "children": []
               }
@@ -159,9 +159,9 @@ describe("private proccessFunctionApplicatons()", () =>
             ],
             [
               {
-                "substring": "1 ",
+                "substring": "1",
                 "substringBeginOffset": 2,
-                "substringEndOffset": 3,
+                "substringEndOffset": 2,
                 "children": []
               }
             ]
@@ -185,9 +185,9 @@ describe("private proccessFunctionApplicatons()", () =>
             ],
             [
               {
-                "substring": " 1 ",
-                "substringBeginOffset": 2,
-                "substringEndOffset": 4,
+                "substring": "1",
+                "substringBeginOffset": 3,
+                "substringEndOffset": 3,
                 "children": []
               }
             ]
@@ -211,9 +211,9 @@ describe("private proccessFunctionApplicatons()", () =>
             ],
             [
               {
-                "substring": " 1 ",
-                "substringBeginOffset": 2,
-                "substringEndOffset": 4,
+                "substring": "1",
+                "substringBeginOffset": 3,
+                "substringEndOffset": 3,
                 "children": []
               }
             ]
@@ -255,9 +255,9 @@ describe("private proccessFunctionApplicatons()", () =>
             ],
             [
               {
-                "substring": "  1  ",
-                "substringBeginOffset": 4,
-                "substringEndOffset": 8,
+                "substring": "1",
+                "substringBeginOffset": 6,
+                "substringEndOffset": 6,
                 "children": []
               }
             ]
@@ -325,7 +325,6 @@ describe("private proccessFunctionApplicatons()", () =>
                 "substring": "f",
                 "substringBeginOffset": 0,
                 "substringEndOffset": 0,
-
                 "children": []
               }
             ],
@@ -339,8 +338,8 @@ describe("private proccessFunctionApplicatons()", () =>
             ],
             [
               {
-                "substring": " 1",
-                "substringBeginOffset": 4,
+                "substring": "1",
+                "substringBeginOffset": 5,
                 "substringEndOffset": 5,
                 "children": []
               }
@@ -373,24 +372,24 @@ describe("private proccessFunctionApplicatons()", () =>
             ],
             [
               {
-                "substring": " 0",
-                "substringBeginOffset": 4,
+                "substring": "0",
+                "substringBeginOffset": 5,
                 "substringEndOffset": 5,
                 "children": []
               }
             ],
             [
               {
-                "substring": " 1",
-                "substringBeginOffset": 7,
+                "substring": "1",
+                "substringBeginOffset": 8,
                 "substringEndOffset": 8,
                 "children": []
               }
             ],
             [
               {
-                "substring": " 1",
-                "substringBeginOffset": 10,
+                "substring": "1",
+                "substringBeginOffset": 11,
                 "substringEndOffset": 11,
                 "children": []
               }
@@ -418,8 +417,32 @@ describe("private proccessFunctionApplicatons()", () =>
             ],
             [
               {
-                "substring": "1 + 1",
+                "substring": "1",
                 "substringBeginOffset": 2,
+                "substringEndOffset": 2,
+                "children": []
+              },
+              {
+                "substring": " ",
+                "substringBeginOffset": 3,
+                "substringEndOffset": 3,
+                "children": []
+              },
+              {
+                "substring": "+",
+                "substringBeginOffset": 4,
+                "substringEndOffset": 4,
+                "children": []
+              },
+              {
+                "substring": " ",
+                "substringBeginOffset": 5,
+                "substringEndOffset": 5,
+                "children": []
+              },
+              {
+                "substring": "1",
+                "substringBeginOffset": 6,
                 "substringEndOffset": 6,
                 "children": []
               }
@@ -444,24 +467,168 @@ describe("private proccessFunctionApplicatons()", () =>
             ],
             [
               {
-                "substring": "1 + 1 + 0 + 0 + 1",
+                "substring": "1",
                 "substringBeginOffset": 2,
+                "substringEndOffset": 2,
+                "children": []
+              },
+              {
+                "substring": " ",
+                "substringBeginOffset": 3,
+                "substringEndOffset": 3,
+                "children": []
+              },
+              {
+                "substring": "+",
+                "substringBeginOffset": 4,
+                "substringEndOffset": 4,
+                "children": []
+              },
+              {
+                "substring": " ",
+                "substringBeginOffset": 5,
+                "substringEndOffset": 5,
+                "children": []
+              },
+              {
+                "substring": "1",
+                "substringBeginOffset": 6,
+                "substringEndOffset": 6,
+                "children": []
+              },
+              {
+                "substring": " ",
+                "substringBeginOffset": 7,
+                "substringEndOffset": 7,
+                "children": []
+              },
+              {
+                "substring": "+",
+                "substringBeginOffset": 8,
+                "substringEndOffset": 8,
+                "children": []
+              },
+              {
+                "substring": " ",
+                "substringBeginOffset": 9,
+                "substringEndOffset": 9,
+                "children": []
+              },
+              {
+                "substring": "0",
+                "substringBeginOffset": 10,
+                "substringEndOffset": 10,
+                "children": []
+              },
+              {
+                "substring": " ",
+                "substringBeginOffset": 11,
+                "substringEndOffset": 11,
+                "children": []
+              },
+              {
+                "substring": "+",
+                "substringBeginOffset": 12,
+                "substringEndOffset": 12,
+                "children": []
+              },
+              {
+                "substring": " ",
+                "substringBeginOffset": 13,
+                "substringEndOffset": 13,
+                "children": []
+              },
+              {
+                "substring": "0",
+                "substringBeginOffset": 14,
+                "substringEndOffset": 14,
+                "children": []
+              },
+              {
+                "substring": " ",
+                "substringBeginOffset": 15,
+                "substringEndOffset": 15,
+                "children": []
+              },
+              {
+                "substring": "+",
+                "substringBeginOffset": 16,
+                "substringEndOffset": 16,
+                "children": []
+              },
+              {
+                "substring": " ",
+                "substringBeginOffset": 17,
+                "substringEndOffset": 17,
+                "children": []
+              },
+              {
+                "substring": "1",
+                "substringBeginOffset": 18,
                 "substringEndOffset": 18,
                 "children": []
               }
             ],
             [
               {
-                "substring": " 1 + 0",
-                "substringBeginOffset": 20,
+                "substring": "1",
+                "substringBeginOffset": 21,
+                "substringEndOffset": 21,
+                "children": []
+              },
+              {
+                "substring": " ",
+                "substringBeginOffset": 22,
+                "substringEndOffset": 22,
+                "children": []
+              },
+              {
+                "substring": "+",
+                "substringBeginOffset": 23,
+                "substringEndOffset": 23,
+                "children": []
+              },
+              {
+                "substring": " ",
+                "substringBeginOffset": 24,
+                "substringEndOffset": 24,
+                "children": []
+              },
+              {
+                "substring": "0",
+                "substringBeginOffset": 25,
                 "substringEndOffset": 25,
                 "children": []
               }
             ],
             [
               {
-                "substring": " 0 + 1",
-                "substringBeginOffset": 27,
+                "substring": "0",
+                "substringBeginOffset": 28,
+                "substringEndOffset": 28,
+                "children": []
+              },
+              {
+                "substring": " ",
+                "substringBeginOffset": 29,
+                "substringEndOffset": 29,
+                "children": []
+              },
+              {
+                "substring": "+",
+                "substringBeginOffset": 30,
+                "substringEndOffset": 30,
+                "children": []
+              },
+              {
+                "substring": " ",
+                "substringBeginOffset": 31,
+                "substringEndOffset": 31,
+                "children": []
+              },
+              {
+                "substring": "1",
+                "substringBeginOffset": 32,
                 "substringEndOffset": 32,
                 "children": []
               }
@@ -489,8 +656,32 @@ describe("private proccessFunctionApplicatons()", () =>
             ],
             [
               {
-                "substring": "1 + 1",
+                "substring": "1",
                 "substringBeginOffset": 2,
+                "substringEndOffset": 2,
+                "children": []
+              },
+              {
+                "substring": " ",
+                "substringBeginOffset": 3,
+                "substringEndOffset": 3,
+                "children": []
+              },
+              {
+                "substring": "+",
+                "substringBeginOffset": 4,
+                "substringEndOffset": 4,
+                "children": []
+              },
+              {
+                "substring": " ",
+                "substringBeginOffset": 5,
+                "substringEndOffset": 5,
+                "children": []
+              },
+              {
+                "substring": "1",
+                "substringBeginOffset": 6,
                 "substringEndOffset": 6,
                 "children": []
               }
@@ -512,8 +703,32 @@ describe("private proccessFunctionApplicatons()", () =>
             ],
             [
               {
-                "substring": "0 + 0",
+                "substring": "0",
                 "substringBeginOffset": 10,
+                "substringEndOffset": 10,
+                "children": []
+              },
+              {
+                "substring": " ",
+                "substringBeginOffset": 11,
+                "substringEndOffset": 11,
+                "children": []
+              },
+              {
+                "substring": "+",
+                "substringBeginOffset": 12,
+                "substringEndOffset": 12,
+                "children": []
+              },
+              {
+                "substring": " ",
+                "substringBeginOffset": 13,
+                "substringEndOffset": 13,
+                "children": []
+              },
+              {
+                "substring": "0",
+                "substringBeginOffset": 14,
                 "substringEndOffset": 14,
                 "children": []
               }
@@ -538,8 +753,32 @@ describe("private proccessFunctionApplicatons()", () =>
             ],
             [
               {
-                "substring": "1 + 1",
+                "substring": "1",
                 "substringBeginOffset": 2,
+                "substringEndOffset": 2,
+                "children": []
+              },
+              {
+                "substring": " ",
+                "substringBeginOffset": 3,
+                "substringEndOffset": 3,
+                "children": []
+              },
+              {
+                "substring": "+",
+                "substringBeginOffset": 4,
+                "substringEndOffset": 4,
+                "children": []
+              },
+              {
+                "substring": " ",
+                "substringBeginOffset": 5,
+                "substringEndOffset": 5,
+                "children": []
+              },
+              {
+                "substring": "1",
+                "substringBeginOffset": 6,
                 "substringEndOffset": 6,
                 "children": []
               }
@@ -579,8 +818,32 @@ describe("private proccessFunctionApplicatons()", () =>
             ],
             [
               {
-                "substring": "0 + 0",
+                "substring": "0",
                 "substringBeginOffset": 13,
+                "substringEndOffset": 13,
+                "children": []
+              },
+              {
+                "substring": " ",
+                "substringBeginOffset": 14,
+                "substringEndOffset": 14,
+                "children": []
+              },
+              {
+                "substring": "+",
+                "substringBeginOffset": 15,
+                "substringEndOffset": 15,
+                "children": []
+              },
+              {
+                "substring": " ",
+                "substringBeginOffset": 16,
+                "substringEndOffset": 16,
+                "children": []
+              },
+              {
+                "substring": "0",
+                "substringBeginOffset": 17,
                 "substringEndOffset": 17,
                 "children": []
               }
@@ -592,10 +855,634 @@ describe("private proccessFunctionApplicatons()", () =>
 
     test("Nested functions", () =>
     {
-      
+      expect(processString("f(0, f(1, 1))", lexer, signature, symbolTable).toArray().map(element => element["reducedNodeObject"]())).toStrictEqual([
+        {
+          "substring": "f(0, f(1, 1))",
+          "substringBeginOffset": 0,
+          "substringEndOffset": 12,
+          "children": [
+            [
+              {
+                "substring": "f",
+                "substringBeginOffset": 0,
+                "substringEndOffset": 0,
+                "children": []
+              }
+            ],
+            [
+              {
+                "substring": "0",
+                "substringBeginOffset": 2,
+                "substringEndOffset": 2,
+                "children": []
+              }
+            ],
+            [
+              {
+                "substring": "f(1, 1)",
+                "substringBeginOffset": 5,
+                "substringEndOffset": 11,
+                "children": [
+                  [
+                    {
+                      "substring": "f",
+                      "substringBeginOffset": 5,
+                      "substringEndOffset": 5,
+                      "children": []
+                    }
+                  ],
+                  [
+                    {
+                      "substring": "1",
+                      "substringBeginOffset": 7,
+                      "substringEndOffset": 7,
+                      "children": []
+                    }
+                  ],
+                  [
+                    {
+                      "substring": "1",
+                      "substringBeginOffset": 10,
+                      "substringEndOffset": 10,
+                      "children": []
+                    }
+                  ]
+                ]
+              }
+            ]
+          ]
+        }
+      ]);
+
+      expect(processString("f(0, 1 + f(1, 1) + 0)", lexer, signature, symbolTable).toArray().map(element => element["reducedNodeObject"]())).toStrictEqual([
+        {
+          "substring": "f(0, 1 + f(1, 1) + 0)",
+          "substringBeginOffset": 0,
+          "substringEndOffset": 20,
+          "children": [
+            [
+              {
+                "substring": "f",
+                "substringBeginOffset": 0,
+                "substringEndOffset": 0,
+                "children": []
+              }
+            ],
+            [
+              {
+                "substring": "0",
+                "substringBeginOffset": 2,
+                "substringEndOffset": 2,
+                "children": []
+              }
+            ],
+            [
+              {
+                "substring": "1",
+                "substringBeginOffset": 5,
+                "substringEndOffset": 5,
+                "children": []
+              },
+              {
+                "substring": " ",
+                "substringBeginOffset": 6,
+                "substringEndOffset": 6,
+                "children": []
+              },
+              {
+                "substring": "+",
+                "substringBeginOffset": 7,
+                "substringEndOffset": 7,
+                "children": []
+              },
+              {
+                "substring": " ",
+                "substringBeginOffset": 8,
+                "substringEndOffset": 8,
+                "children": []
+              },
+              {
+                "substring": "f(1, 1)",
+                "substringBeginOffset": 9,
+                "substringEndOffset": 15,
+                "children": [
+                  [
+                    {
+                      "substring": "f",
+                      "substringBeginOffset": 9,
+                      "substringEndOffset": 9,
+                      "children": []
+                    }
+                  ],
+                  [
+                    {
+                      "substring": "1",
+                      "substringBeginOffset": 11,
+                      "substringEndOffset": 11,
+                      "children": []
+                    }
+                  ],
+                  [
+                    {
+                      "substring": "1",
+                      "substringBeginOffset": 14,
+                      "substringEndOffset": 14,
+                      "children": []
+                    }
+                  ]
+                ]
+              },
+              {
+                "substring": " ",
+                "substringBeginOffset": 16,
+                "substringEndOffset": 16,
+                "children": []
+              },
+              {
+                "substring": "+",
+                "substringBeginOffset": 17,
+                "substringEndOffset": 17,
+                "children": []
+              },
+              {
+                "substring": " ",
+                "substringBeginOffset": 18,
+                "substringEndOffset": 18,
+                "children": []
+              },
+              {
+                "substring": "0",
+                "substringBeginOffset": 19,
+                "substringEndOffset": 19,
+                "children": []
+              }
+            ]
+          ]
+        }
+      ]);
+
+      expect(processString("f(f(f(f(1))))", lexer, signature, symbolTable).toArray().map(element => element["reducedNodeObject"]())).toStrictEqual([
+        {
+          "substring": "f(f(f(f(1))))",
+          "substringBeginOffset": 0,
+          "substringEndOffset": 12,
+          "children": [
+            [
+              {
+                "substring": "f",
+                "substringBeginOffset": 0,
+                "substringEndOffset": 0,
+                "children": []
+              }
+            ],
+            [
+              {
+                "substring": "f(f(f(1)))",
+                "substringBeginOffset": 2,
+                "substringEndOffset": 11,
+                "children": [
+                  [
+                    {
+                      "substring": "f",
+                      "substringBeginOffset": 2,
+                      "substringEndOffset": 2,
+                      "children": []
+                    }
+                  ],
+                  [
+                    {
+                      "substring": "f(f(1))",
+                      "substringBeginOffset": 4,
+                      "substringEndOffset": 10,
+                      "children": [
+                        [
+                          {
+                            "substring": "f",
+                            "substringBeginOffset": 4,
+                            "substringEndOffset": 4,
+                            "children": []
+                          }
+                        ],
+                        [
+                          {
+                            "substring": "f(1)",
+                            "substringBeginOffset": 6,
+                            "substringEndOffset": 9,
+                            "children": [
+                              [
+                                {
+                                  "substring": "f",
+                                  "substringBeginOffset": 6,
+                                  "substringEndOffset": 6,
+                                  "children": []
+                                }
+                              ],
+                              [
+                                {
+                                  "substring": "1",
+                                  "substringBeginOffset": 8,
+                                  "substringEndOffset": 8,
+                                  "children": []
+                                }
+                              ]
+                            ]
+                          }
+                        ]
+                      ]
+                    }
+                  ]
+                ]
+              }
+            ]
+          ]
+        }
+      ]);
     });
 
+    test("Currying", () =>
+    {
+      expect(processString("f(0)(1)(0)(1)", lexer, signature, symbolTable).toArray().map(element => element["reducedNodeObject"]())).toStrictEqual([
+        {
+          "substring": "f(0)(1)(0)(1)",
+          "substringBeginOffset": 0,
+          "substringEndOffset": 12,
+          "children": [
+            [
+              {
+                "substring": "f(0)(1)(0)",
+                "substringBeginOffset": 0,
+                "substringEndOffset": 9,
+                "children": [
+                  [
+                    {
+                      "substring": "f(0)(1)",
+                      "substringBeginOffset": 0,
+                      "substringEndOffset": 6,
+                      "children": [
+                        [
+                          {
+                            "substring": "f(0)",
+                            "substringBeginOffset": 0,
+                            "substringEndOffset": 3,
+                            "children": [
+                              [
+                                {
+                                  "substring": "f",
+                                  "substringBeginOffset": 0,
+                                  "substringEndOffset": 0,
+                                  "children": []
+                                }
+                              ],
+                              [
+                                {
+                                  "substring": "0",
+                                  "substringBeginOffset": 2,
+                                  "substringEndOffset": 2,
+                                  "children": []
+                                }
+                              ]
+                            ]
+                          }
+                        ],
+                        [
+                          {
+                            "substring": "1",
+                            "substringBeginOffset": 5,
+                            "substringEndOffset": 5,
+                            "children": []
+                          }
+                        ]
+                      ]
+                    }
+                  ],
+                  [
+                    {
+                      "substring": "0",
+                      "substringBeginOffset": 8,
+                      "substringEndOffset": 8,
+                      "children": []
+                    }
+                  ]
+                ]
+              }
+            ],
+            [
+              {
+                "substring": "1",
+                "substringBeginOffset": 11,
+                "substringEndOffset": 11,
+                "children": []
+              }
+            ]
+          ]
+        }
+      ]);
 
+      expect(processString("f(0 + 1, f(0, 1)(0)  + 0)(1)", lexer, signature, symbolTable).toArray().map(element => element["reducedNodeObject"]())).toStrictEqual([
+        {
+          "substring": "f(0 + 1, f(0, 1)(0)  + 0)(1)",
+          "substringBeginOffset": 0,
+          "substringEndOffset": 27,
+          "children": [
+            [
+              {
+                "substring": "f(0 + 1, f(0, 1)(0)  + 0)",
+                "substringBeginOffset": 0,
+                "substringEndOffset": 24,
+                "children": [
+                  [
+                    {
+                      "substring": "f",
+                      "substringBeginOffset": 0,
+                      "substringEndOffset": 0,
+                      "children": []
+                    }
+                  ],
+                  [
+                    {
+                      "substring": "0",
+                      "substringBeginOffset": 2,
+                      "substringEndOffset": 2,
+                      "children": []
+                    },
+                    {
+                      "substring": " ",
+                      "substringBeginOffset": 3,
+                      "substringEndOffset": 3,
+                      "children": []
+                    },
+                    {
+                      "substring": "+",
+                      "substringBeginOffset": 4,
+                      "substringEndOffset": 4,
+                      "children": []
+                    },
+                    {
+                      "substring": " ",
+                      "substringBeginOffset": 5,
+                      "substringEndOffset": 5,
+                      "children": []
+                    },
+                    {
+                      "substring": "1",
+                      "substringBeginOffset": 6,
+                      "substringEndOffset": 6,
+                      "children": []
+                    }
+                  ],
+                  [
+                    {
+                      "substring": "f(0, 1)(0)",
+                      "substringBeginOffset": 9,
+                      "substringEndOffset": 18,
+                      "children": [
+                        [
+                          {
+                            "substring": "f(0, 1)",
+                            "substringBeginOffset": 9,
+                            "substringEndOffset": 15,
+                            "children": [
+                              [
+                                {
+                                  "substring": "f",
+                                  "substringBeginOffset": 9,
+                                  "substringEndOffset": 9,
+                                  "children": []
+                                }
+                              ],
+                              [
+                                {
+                                  "substring": "0",
+                                  "substringBeginOffset": 11,
+                                  "substringEndOffset": 11,
+                                  "children": []
+                                }
+                              ],
+                              [
+                                {
+                                  "substring": "1",
+                                  "substringBeginOffset": 14,
+                                  "substringEndOffset": 14,
+                                  "children": []
+                                }
+                              ]
+                            ]
+                          }
+                        ],
+                        [
+                          {
+                            "substring": "0",
+                            "substringBeginOffset": 17,
+                            "substringEndOffset": 17,
+                            "children": []
+                          }
+                        ]
+                      ]
+                    },
+                    {
+                      "substring": " ",
+                      "substringBeginOffset": 19,
+                      "substringEndOffset": 19,
+                      "children": []
+                    },
+                    {
+                      "substring": " ",
+                      "substringBeginOffset": 20,
+                      "substringEndOffset": 20,
+                      "children": []
+                    },
+                    {
+                      "substring": "+",
+                      "substringBeginOffset": 21,
+                      "substringEndOffset": 21,
+                      "children": []
+                    },
+                    {
+                      "substring": " ",
+                      "substringBeginOffset": 22,
+                      "substringEndOffset": 22,
+                      "children": []
+                    },
+                    {
+                      "substring": "0",
+                      "substringBeginOffset": 23,
+                      "substringEndOffset": 23,
+                      "children": []
+                    }
+                  ]
+                ]
+              }
+            ],
+            [
+              {
+                "substring": "1",
+                "substringBeginOffset": 26,
+                "substringEndOffset": 26,
+                "children": []
+              }
+            ]
+          ]
+        }
+      ]);
+    });
+
+    test("Relevant Whitespace", () =>
+    {
+      expect(processString("(+ f (1 + 0))", lexer, signature, symbolTable).toArray().map(element => element["reducedNodeObject"]())).toStrictEqual([
+        {
+          "substring": "(",
+          "substringBeginOffset": 0,
+          "substringEndOffset": 0,
+          "children": []
+        },
+        {
+          "substring": "+",
+          "substringBeginOffset": 1,
+          "substringEndOffset": 1,
+          "children": []
+        },
+        {
+          "substring": " ",
+          "substringBeginOffset": 2,
+          "substringEndOffset": 2,
+          "children": []
+        },
+        {
+          "substring": "f",
+          "substringBeginOffset": 3,
+          "substringEndOffset": 3,
+          "children": []
+        },
+        {
+          "substring": " ",
+          "substringBeginOffset": 4,
+          "substringEndOffset": 4,
+          "children": []
+        },
+        {
+          "substring": "(",
+          "substringBeginOffset": 5,
+          "substringEndOffset": 5,
+          "children": []
+        },
+        {
+          "substring": "1",
+          "substringBeginOffset": 6,
+          "substringEndOffset": 6,
+          "children": []
+        },
+        {
+          "substring": " ",
+          "substringBeginOffset": 7,
+          "substringEndOffset": 7,
+          "children": []
+        },
+        {
+          "substring": "+",
+          "substringBeginOffset": 8,
+          "substringEndOffset": 8,
+          "children": []
+        },
+        {
+          "substring": " ",
+          "substringBeginOffset": 9,
+          "substringEndOffset": 9,
+          "children": []
+        },
+        {
+          "substring": "0",
+          "substringBeginOffset": 10,
+          "substringEndOffset": 10,
+          "children": []
+        },
+        {
+          "substring": ")",
+          "substringBeginOffset": 11,
+          "substringEndOffset": 11,
+          "children": []
+        },
+        {
+          "substring": ")",
+          "substringBeginOffset": 12,
+          "substringEndOffset": 12,
+          "children": []
+        }
+      ]);
+
+      expect(processString("f(1) (0) (1)", lexer, signature, symbolTable).toArray().map(element => element["reducedNodeObject"]())).toStrictEqual([
+        {
+          "substring": "f(1)",
+          "substringBeginOffset": 0,
+          "substringEndOffset": 3,
+          "children": [
+            [
+              {
+                "substring": "f",
+                "substringBeginOffset": 0,
+                "substringEndOffset": 0,
+                "children": []
+              }
+            ],
+            [
+              {
+                "substring": "1",
+                "substringBeginOffset": 2,
+                "substringEndOffset": 2,
+                "children": []
+              }
+            ]
+          ]
+        },
+        {
+          "substring": " ",
+          "substringBeginOffset": 4,
+          "substringEndOffset": 4,
+          "children": []
+        },
+        {
+          "substring": "(",
+          "substringBeginOffset": 5,
+          "substringEndOffset": 5,
+          "children": []
+        },
+        {
+          "substring": "0",
+          "substringBeginOffset": 6,
+          "substringEndOffset": 6,
+          "children": []
+        },
+        {
+          "substring": ")",
+          "substringBeginOffset": 7,
+          "substringEndOffset": 7,
+          "children": []
+        },
+        {
+          "substring": " ",
+          "substringBeginOffset": 8,
+          "substringEndOffset": 8,
+          "children": []
+        },
+        {
+          "substring": "(",
+          "substringBeginOffset": 9,
+          "substringEndOffset": 9,
+          "children": []
+        },
+        {
+          "substring": "1",
+          "substringBeginOffset": 10,
+          "substringEndOffset": 10,
+          "children": []
+        },
+        {
+          "substring": ")",
+          "substringBeginOffset": 11,
+          "substringEndOffset": 11,
+          "children": []
+        }
+      ]);
+    });
 
   });
 });
