@@ -815,3 +815,52 @@ describe("trasnferNodeAfter()", () =>
     });
   });
 });
+
+describe("trasnferNodeBefore()", () =>
+{
+  describe("Pre Conditions", () =>
+  {
+    test("sourceIterator must be valid and refer to this list", () =>
+    {
+      const source = new LinkedList(10);
+      const target = new LinkedList(20);
+      expect(() => source.transferNodeBefore(target.iteratorAtHead(), target, target.iteratorAtHead())).toThrow("Passed iterator does not point to this list!");
+    });
+
+    test("targetIterator must be valid and refer to target list", () =>
+    {
+      const source = new LinkedList(10);
+      const target = new LinkedList(20);
+      expect(() => source.transferNodeBefore(source.iteratorAtHead(), target, source.iteratorAtHead())).toThrow("Passed iterator does not point to this list!");
+    });
+  });
+
+  describe("Post Conditions", () =>
+  {
+    test("Transfer is successfull", () =>
+    {
+      const source = new LinkedList(10);
+      const target = new LinkedList(20);
+      source.transferNodeBefore(source.iteratorAtHead(), target, target.iteratorAtHead());
+      expect(source.isEmpty()).toBe(true);
+      expect(source["length"]).toBe(0);
+      expect(source["head"]).toBe(null);
+      expect(source["last"]).toBe(null);
+
+      expect(target.size()).toBe(2);
+      expect(target["head"]?.data).toBe(10);
+      expect(target["last"]?.data).toBe(20);
+      expect(target["head"]!.list).toBe(target);
+    });
+
+    test("Iterators to transfered nodes remain valid", () =>
+    {
+      const source = new LinkedList(10);
+      const target = new LinkedList(20);
+      const iterator = source.iteratorAtHead();
+      source.transferNodeBefore(source.iteratorAtHead(), target, target.iteratorAtHead());
+      expect(iterator.get()).toBe(10);
+      expect(iterator.getList()).toBe(target);
+    });
+  });
+});

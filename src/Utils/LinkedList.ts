@@ -741,6 +741,67 @@ export class LinkedList<T>
     targetList.length++;
   }
 
+  /**
+   * Transfers a given node from this list to target list
+   * before the node `targetListIterator` points to.
+   * 
+   * This method doesn't invalidate/move iterators pointing
+   * at the transfered node.
+   * Non-const.
+   * 
+   * @param sourceListIterator 
+   * @param targetList 
+   * @param targetListIterator 
+   */
+  public transferNodeBefore(sourceListIterator : LinkedListIterator<T>, targetList : LinkedList<T>, targetListIterator : LinkedListIterator<T>) : void
+  {
+    this.checkIteratorValidity(sourceListIterator);
+    targetList.checkIteratorValidity(targetListIterator);
+
+    //Remove Node From This List
+    const transferedNode = sourceListIterator["node"]; //Friendship access
+    const transferedNodePreviousNode = transferedNode!.previous;
+    const transferedNodeNextNode = transferedNode!.next;
+
+
+    if(transferedNode!.isHead())
+    {
+      this.head = transferedNodeNextNode;
+    }
+    else
+    {
+      transferedNodePreviousNode!.next = transferedNodeNextNode;
+    }
+
+    if(transferedNode!.isLast())
+    {
+      this.last = transferedNodePreviousNode;
+    }
+    else
+    {
+      transferedNodeNextNode!.previous = transferedNodePreviousNode;
+    }
+
+    this.length--;
+
+    //Insert Node At Target List
+    transferedNode!.list = targetList; //Transfering node ownership to new list
+    const targetListReferenceNode = targetListIterator["node"]; //Friendship access
+    const beforeInsertedNode = targetListReferenceNode!.previous;
+    const insertedNode = transferedNode;
+    if(targetListReferenceNode!.isHead())
+    {
+      targetList.head = insertedNode;
+    }
+    else
+    {
+      beforeInsertedNode!.next = insertedNode;
+    }
+    targetListReferenceNode!.previous = insertedNode;
+
+    targetList.length++;
+  }
+
   private head : LinkedListNode<T> | null;
   private last : LinkedListNode<T> | null;
   private length : number;
