@@ -32,18 +32,28 @@ export class ParseTreeNode
   private reducedNodeObject() : ReducedNodeObject
   {
     const children : Array<Array<ReducedNodeObject>> = [];
-    for(const child of this.children)
+    for(const nodeList of this.children)
     {
       const nodeArray : Array<ReducedNodeObject> = [];
-      for(const node of child)
+      for(const node of nodeList)
       {
         nodeArray.push(node.reducedNodeObject());
       }
       children.push(nodeArray);
     }
 
+    let substring;
+    try
+    {
+      substring = this.getCorrespondingInputSubstring().toString();
+    }
+    catch(error)
+    {
+      substring = undefined;
+    }
+
     return {
-      substring : this.getCorrespondingInputSubstring().toString(),
+      substring : substring,
       substringBeginOffset : this.substringBeginOffset,
       substringEndOffset : this.substringEndOffset,
       children

@@ -406,10 +406,10 @@ describe("remove()", () =>
       const list = new LinkedList(10);
       const iterator = new LinkedListIterator(list);
       list.insertAfter(iterator, 20);
-      list.remove(iterator);
+      const newIter = list.remove(iterator);
 
       expect(list.size()).toBe(1);
-      expect(iterator.get()).toBe(20);
+      expect(newIter.get()).toBe(20);
       expect(list["head"]?.data).toBe(20);
       expect(list["last"]?.data).toBe(20);
     });
@@ -800,7 +800,11 @@ describe("trasnferNodeAfter()", () =>
 
       expect(target.size()).toBe(2);
       expect(target["head"]?.data).toBe(20);
+      expect(target["head"]?.previous).toBe(null);
+      expect(target["head"]?.next).toBe(target["last"]);
       expect(target["last"]?.data).toBe(10);
+      expect(target["last"]?.previous).toBe(target["head"]);
+      expect(target["last"]?.next).toBe(null);
       expect(target["last"]!.list).toBe(target);
     });
 
@@ -849,7 +853,11 @@ describe("trasnferNodeBefore()", () =>
 
       expect(target.size()).toBe(2);
       expect(target["head"]?.data).toBe(10);
+      expect(target["head"]?.previous).toBe(null);
+      expect(target["head"]?.next).toBe(target["last"]);
       expect(target["last"]?.data).toBe(20);
+      expect(target["last"]?.previous).toBe(target["head"]);
+      expect(target["last"]?.next).toBe(null);
       expect(target["head"]!.list).toBe(target);
     });
 

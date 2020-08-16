@@ -18,7 +18,7 @@ signature.addRecord("f", new TypedTokenRecord(new Type("i->i")));
 signature.addRecord("+", new TypedTokenRecord(new Type("[i,i]->i")));
 const symbolTable = new FunctionalSymbolsAndOperatorsTable();
 symbolTable.addFunctionalSymbol("f");
-Parser.parse("f(1) (0) (1)", lexer, signature, symbolTable);
+Parser.parse("f(1 )", lexer, signature, symbolTable);
 
 describe("private convertTokenStringToNodeListAndHandleBrackets()", () =>
 {

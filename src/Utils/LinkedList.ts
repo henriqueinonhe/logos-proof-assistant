@@ -373,8 +373,9 @@ export class LinkedList<T>
 
     this.length--;
 
-    iterator["node"] = nextNode;
-    return iterator;
+    const returnIterator = iterator.clone();
+    returnIterator["node"] = nextNode;
+    return returnIterator;
   }
 
   /**
@@ -700,35 +701,14 @@ export class LinkedList<T>
     targetList.checkIteratorValidity(targetListIterator);
 
     //Remove Node From This List
-    const transferedNode = sourceListIterator["node"]; //Friendship access
-    const transferedNodePreviousNode = transferedNode!.previous;
-    const transferedNodeNextNode = transferedNode!.next;
-
-    if(transferedNode!.isHead())
-    {
-      this.head = transferedNodeNextNode;
-    }
-    else
-    {
-      transferedNodePreviousNode!.next = transferedNodeNextNode;
-    }
-
-    if(transferedNode!.isLast())
-    {
-      this.last = transferedNodePreviousNode;
-    }
-    else
-    {
-      transferedNodeNextNode!.previous = transferedNodePreviousNode;
-    }
-
-    this.length--;
+    this.remove(sourceListIterator);
 
     //Insert Node At Target List
+    const transferedNode = sourceListIterator["node"];
     transferedNode!.list = targetList; //Transfering node ownership to new list
-    const targetListReferenceNode = targetListIterator["node"]; //Friendship access
-    const afterInsertedNode = targetListReferenceNode!.next;
-    if(targetListReferenceNode!.isLast())
+    const beforeInsertedNode = targetListIterator["node"]; //Friendship access
+    const afterInsertedNode = beforeInsertedNode!.next;
+    if(beforeInsertedNode!.isLast())
     {
       targetList.last = transferedNode;
     }
@@ -736,7 +716,9 @@ export class LinkedList<T>
     {
       afterInsertedNode!.previous = transferedNode;
     }
-    targetListReferenceNode!.next = transferedNode;
+    beforeInsertedNode!.next = transferedNode;
+    transferedNode!.previous = beforeInsertedNode;
+    transferedNode!.next = afterInsertedNode;
 
     targetList.length++;
   }
@@ -758,38 +740,16 @@ export class LinkedList<T>
     this.checkIteratorValidity(sourceListIterator);
     targetList.checkIteratorValidity(targetListIterator);
 
-    //Remove Node From This List
-    const transferedNode = sourceListIterator["node"]; //Friendship access
-    const transferedNodePreviousNode = transferedNode!.previous;
-    const transferedNodeNextNode = transferedNode!.next;
-
-
-    if(transferedNode!.isHead())
-    {
-      this.head = transferedNodeNextNode;
-    }
-    else
-    {
-      transferedNodePreviousNode!.next = transferedNodeNextNode;
-    }
-
-    if(transferedNode!.isLast())
-    {
-      this.last = transferedNodePreviousNode;
-    }
-    else
-    {
-      transferedNodeNextNode!.previous = transferedNodePreviousNode;
-    }
-
-    this.length--;
+    const transferedNode = sourceListIterator["node"];
+    this.remove(sourceListIterator);
 
     //Insert Node At Target List
     transferedNode!.list = targetList; //Transfering node ownership to new list
-    const targetListReferenceNode = targetListIterator["node"]; //Friendship access
-    const beforeInsertedNode = targetListReferenceNode!.previous;
+    const afterInsertedNode = targetListIterator["node"]; //Friendship access
+    const beforeInsertedNode = afterInsertedNode!.previous;
     const insertedNode = transferedNode;
-    if(targetListReferenceNode!.isHead())
+
+    if(afterInsertedNode!.isHead())
     {
       targetList.head = insertedNode;
     }
@@ -797,9 +757,44 @@ export class LinkedList<T>
     {
       beforeInsertedNode!.next = insertedNode;
     }
-    targetListReferenceNode!.previous = insertedNode;
+    afterInsertedNode!.previous = insertedNode;
+    transferedNode!.previous = beforeInsertedNode;
+    transferedNode!.next = afterInsertedNode;
 
     targetList.length++;
+  }
+
+  public transferNodeToEnd(sourceListIterator : LinkedListIterator<T>, targetList : LinkedList<T>) : LinkedListIterator<T>
+  {
+    this.checkIteratorValidity(sourceListIterator);
+
+    const returnedIterator = this.remove(sourceListIterator);
+
+    //Insert Node At Target List
+    const transferedNode = sourceListIterator["node"];
+    transferedNode!.next = null;
+    transferedNode!.list = targetList; //Transfering node ownership to new list
+    if(targetList.isEmpty())
+    {
+      targetList.head = transferedNode;
+      targetList.last = targetList.head;
+      targetList.length = 1;
+    }
+    else
+    {
+      const beforeInsertedNode = targetList.iteratorAtLast()["node"]; //Friendship access
+      if(beforeInsertedNode!.isLast())
+      {
+        targetList.last = transferedNode;
+      }
+
+      beforeInsertedNode!.next = transferedNode;
+      transferedNode!.previous = beforeInsertedNode;
+    
+      targetList.length++;
+    }
+
+    return returnedIterator;
   }
 
   private head : LinkedListNode<T> | null;
