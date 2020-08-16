@@ -32,7 +32,7 @@ describe("constructor", () =>
     {
       const list = new LinkedList<number>(10);
       const iterator = new LinkedListIterator<number>(list);
-      expect(iterator["list"]).toBe(list);
+      expect(iterator.getList()).toBe(list);
       expect(iterator["node"]?.data).toBe(10);
     });
   });
@@ -106,7 +106,7 @@ describe("goToPrevious()", () =>
     {
       const list = new LinkedList<number>(10);
       const iterator = new LinkedListIterator<number>(list);
-      list["head"]!.previous = new LinkedListNode(20, null, list["head"]);
+      list["head"]!.previous = new LinkedListNode(list, 20, null, list["head"]);
       iterator.goToPrevious();
       expect(iterator.get()).toBe(20);
     });
@@ -132,7 +132,7 @@ describe("goToNext()", () =>
     {
       const list = new LinkedList<number>(10);
       const iterator = new LinkedListIterator<number>(list);
-      list["head"]!.next = new LinkedListNode(20, list["head"], null);
+      list["head"]!.next = new LinkedListNode(list, 20, list["head"], null);
       iterator.goToNext();
       expect(iterator.get()).toBe(20);
     });
@@ -150,7 +150,7 @@ describe("clone()", () =>
     test("Iterator is properly cloned", () =>
     {
       expect(clone["node"]).toBe(iterator["node"]);
-      expect(clone["list"]).toBe(iterator["list"]);
+      expect(clone.getList()).toBe(iterator.getList());
     });
 
     test("Modifying clone doesn't affect original", () =>
@@ -237,7 +237,6 @@ describe("insertAfter()", () =>
       const list = new LinkedList<number>(10);
       const otherList = new LinkedList(10);
       const iterator = new LinkedListIterator<number>(otherList);
-      iterator["node"] = null;
       expect(() => list.insertAfter(iterator, 20)).toThrow("Passed iterator does not point to this list!");
     });
   });
@@ -317,7 +316,6 @@ describe("insertBefore()", () =>
       const list = new LinkedList<number>(10);
       const otherList = new LinkedList(10);
       const iterator = new LinkedListIterator<number>(otherList);
-      iterator["node"] = null;
       expect(() => list.insertBefore(iterator, 20)).toThrow("Passed iterator does not point to this list!");
     });
   });
@@ -397,7 +395,6 @@ describe("remove()", () =>
       const list = new LinkedList<number>(10);
       const otherList = new LinkedList(10);
       const iterator = new LinkedListIterator<number>(otherList);
-      iterator["node"] = null;
       expect(() => list.remove(iterator)).toThrow("Passed iterator does not point to this list!");
     });
   });
@@ -499,7 +496,7 @@ describe("swap()", () =>
     {
       const list = new LinkedList(10);
       const first = new LinkedListIterator(list);
-      first["list"] = new LinkedList(10);
+      first["node"] = new LinkedList(10)["head"];
       const second = new LinkedListIterator(list);
 
       expect(() => list.swap(first, second)).toThrow("Passed iterator does not point to this list!");
@@ -520,7 +517,7 @@ describe("swap()", () =>
       const list = new LinkedList(10);
       const first = new LinkedListIterator(list);
       const second = new LinkedListIterator(list);
-      second["list"] = new LinkedList(10);
+      second["node"] = new LinkedList(10)["head"];
 
       expect(() => list.swap(first, second)).toThrow("Passed iterator does not point to this list!");
     });
@@ -769,3 +766,52 @@ describe("Iterator Protocol", () =>
 //     });
 //   });
 // });
+
+describe("trasnferNodeAfter()", () =>
+{
+  describe("Pre Conditions", () =>
+  {
+    test("sourceIterator must be valid and refer to this list", () =>
+    {
+      const source = new LinkedList(10);
+      const target = new LinkedList(20);
+      expect(() => source.transferNodeAfter(target.iteratorAtHead(), target, target.iteratorAtHead())).toThrow("Passed iterator does not point to this list!");
+    });
+
+    test("targetIterator must be valid and refer to target list", () =>
+    {
+      const source = new LinkedList(10);
+      const target = new LinkedList(20);
+      expect(() => source.transferNodeAfter(source.iteratorAtHead(), target, source.iteratorAtHead())).toThrow("Passed iterator does not point to this list!");
+    });
+  });
+
+  describe("Post Conditions", () =>
+  {
+    test("Transfer is successfull", () =>
+    {
+      const source = new LinkedList(10);
+      const target = new LinkedList(20);
+      source.transferNodeAfter(source.iteratorAtHead(), target, target.iteratorAtHead());
+      expect(source.isEmpty()).toBe(true);
+      expect(source["length"]).toBe(0);
+      expect(source["head"]).toBe(null);
+      expect(source["last"]).toBe(null);
+
+      expect(target.size()).toBe(2);
+      expect(target["head"]?.data).toBe(20);
+      expect(target["last"]?.data).toBe(10);
+      expect(target["last"]!.list).toBe(target);
+    });
+
+    test("Iterators to transfered nodes remain valid", () =>
+    {
+      const source = new LinkedList(10);
+      const target = new LinkedList(20);
+      const iterator = source.iteratorAtHead();
+      source.transferNodeAfter(source.iteratorAtHead(), target, target.iteratorAtHead());
+      expect(iterator.get()).toBe(10);
+      expect(iterator.getList()).toBe(target);
+    });
+  });
+});
