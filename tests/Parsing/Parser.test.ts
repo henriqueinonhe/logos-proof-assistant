@@ -3,7 +3,6 @@ import { LogosLexer } from "../../src/Lexing/LogosLexer";
 import { LogosSignature } from "../../src/Lexing/LogosSignature";
 import { TypedTokenRecord } from "../../src/Lexing/TypedTokenRecord";
 import { Type } from "../../src/Type/Type";
-import { ParseTreeBracketNode } from "../../src/Parsing/ParseTreeBracketNode";
 import { FunctionalSymbolsAndOperatorsTable } from "../../src/Parsing/FunctionalSymbolsAndOperatorsTable";
 import { LinkedList, LinkedListIterator } from "../../src/Utils/LinkedList";
 import { ParseTreeNode } from "../../src/Parsing/ParseTreeNode";
@@ -30,7 +29,7 @@ symbolTable.addOperatorSymbol(":", 2, 1, 30, OperatorAssociativity.Left);
 symbolTable.addOperatorSymbol("+", 2, 1, 40, OperatorAssociativity.Right);
 symbolTable.addOperatorSymbol("-", 2, 1, 50, OperatorAssociativity.Left);
 
-Parser.parse("f(0 + 1, f(1 + 1, f(0)) + 1)(1 + 1)(0 + 0) + 1", lexer, signature, symbolTable);
+Parser.parse("(((0 + 1) + 1) + ((0 + 1) + 1))", lexer, signature, symbolTable);
 
 describe("private convertTokenStringToNodeListAndHandleBrackets()", () =>
 {
@@ -59,25 +58,17 @@ describe("private convertTokenStringToNodeListAndHandleBrackets()", () =>
       {
         expect(tokenWrapperList.at(index).substringBeginOffset).toBe(index);
       }
-
-      expect((tokenWrapperList.at(0) as ParseTreeBracketNode).matchingBracketNodeIterator?.get()).toBe(tokenWrapperList.at(30));
-      expect((tokenWrapperList.at(1) as ParseTreeBracketNode).matchingBracketNodeIterator?.get()).toBe(tokenWrapperList.at(13));
-      expect((tokenWrapperList.at(2) as ParseTreeBracketNode).matchingBracketNodeIterator?.get()).toBe(tokenWrapperList.at(8));
-      expect((tokenWrapperList.at(8) as ParseTreeBracketNode).matchingBracketNodeIterator?.get()).toBe(tokenWrapperList.at(2));
-      expect((tokenWrapperList.at(13) as ParseTreeBracketNode).matchingBracketNodeIterator?.get()).toBe(tokenWrapperList.at(1));
-      expect((tokenWrapperList.at(17) as ParseTreeBracketNode).matchingBracketNodeIterator?.get()).toBe(tokenWrapperList.at(29));
-      expect((tokenWrapperList.at(18) as ParseTreeBracketNode).matchingBracketNodeIterator?.get()).toBe(tokenWrapperList.at(24));
     });
   });
 });
 
 describe("private generateOperatorsIteratorQueue()", () =>
 {
-  function processString(string : string, lexer : Lexer, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable) : Array<LinkedListIterator<ParseTreeNode>>
+  function processString(string : string, lexer : Lexer, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable) : [Array<LinkedListIterator<ParseTreeNode>>, Array<LinkedListIterator<ParseTreeNode>>]
   {
     const tokenString = lexer.lex(string, signature);
     const nodeList = Parser["convertTokenStringToNodeListAndHandleBrackets"](tokenString);
-    return Parser["generateOperatorsIteratorQueue"](nodeList, symbolTable);
+    return Parser["generateFunctionalSymbolsAndOperatorsIteratorQueue"](nodeList, symbolTable);
   }
 
   const lexer = new LogosLexer();
@@ -101,11 +92,16 @@ describe("private generateOperatorsIteratorQueue()", () =>
 
   describe("Post Conditions", () =>
   {
-    test("Queue is setup correctly", () =>
+    test("Operators queue is setup correctly", () =>
     {
-      expect(processString("1 + 0 + 1 + 0", lexer, signature, symbolTable).map(iter => iter.get().substringBeginOffset)).toStrictEqual([2, 6, 10]);
+      expect(processString("1 + 0 + 1 + 0", lexer, signature, symbolTable)[1].map(iter => iter.get().substringBeginOffset)).toStrictEqual([2, 6, 10]);
 
-      expect(processString("1 ^ 1 * 1 + 1 : 1 - 1 ^ 1 ^ 1 : 1 * 0 * 0", lexer, signature, symbolTable).map(iter => iter.get().substringBeginOffset)).toStrictEqual([2, 22, 26, 38, 34, 6, 14, 30, 10, 18]);
+      expect(processString("1 ^ 1 * 1 + 1 : 1 - 1 ^ 1 ^ 1 : 1 * 0 * 0", lexer, signature, symbolTable)[1].map(iter => iter.get().substringBeginOffset)).toStrictEqual([2, 22, 26, 38, 34, 6, 14, 30, 10, 18]);
+    });
+
+    test("Functional Symbols queue is setup correctly", () =>
+    {
+      expect(processString("1 + f(1) + f(f(f(0))) + f (1 + 1)", lexer, signature, symbolTable)[0].map(iter => iter.get().substringBeginOffset)).toStrictEqual([4, 11, 13, 15]);
     });
   });
 });
@@ -113,13 +109,13 @@ describe("private generateOperatorsIteratorQueue()", () =>
 describe("private proccessFunctionApplicatons()", () =>
 {
   //To make testing simpler
-  function processString(string : string, lexer : Lexer, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable) : [LinkedList<ParseTreeNode>, Array<LinkedListIterator<ParseTreeNode>>]
+  function processString(string : string, lexer : Lexer, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable) : [LinkedList<ParseTreeNode>, Array<LinkedListIterator<ParseTreeNode>>, Array<LinkedListIterator<ParseTreeNode>>]
   {
     const tokenString = lexer.lex(string, signature);
     const nodeList = Parser["convertTokenStringToNodeListAndHandleBrackets"](tokenString);
-    const operatorsQueue = Parser["generateOperatorsIteratorQueue"](nodeList, symbolTable);
+    const [functionalSymbolsQueue, operatorsQueue] = Parser["generateFunctionalSymbolsAndOperatorsIteratorQueue"](nodeList, symbolTable);
     Parser["reduceFunctionApplications"](nodeList, signature, symbolTable, tokenString);
-    return [nodeList, operatorsQueue];
+    return [nodeList, operatorsQueue, functionalSymbolsQueue];
   }
 
   const lexer = new LogosLexer();

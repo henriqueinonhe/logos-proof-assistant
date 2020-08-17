@@ -5,9 +5,9 @@ import { LinkedList, LinkedListIterator } from "../Utils/LinkedList";
 import { TokenString } from "../Token/TokenString";
 import { InvalidArgumentException } from "../Utils/LogosUtils";
 import { ParseTreeNode as ParseTreeNode } from "./ParseTreeNode";
-import { ParseTreeBracketNode } from "./ParseTreeBracketNode";
 import { OperatorAssociativity } from "./OperatorRecord";
 import fs from "fs";
+import { ParseTree } from "./ParseTree";
 
 export class Parser
 {
@@ -20,96 +20,19 @@ export class Parser
     const nodeList = Parser.convertTokenStringToNodeListAndHandleBrackets(tokenString);
     
     //3. Iterators to Tokens For Further Processing
-    const operatorsIteratorQueue = Parser.generateOperatorsIteratorQueue(nodeList, symbolTable);
+    const [functionalSymbolsIteratorQueue, operatorsIteratorQueue] = Parser.generateFunctionalSymbolsAndOperatorsIteratorQueue(nodeList, symbolTable);
 
-    //4. Reduce Function Applications
-    Parser.reduceFunctionApplications(nodeList, signature, symbolTable, tokenString);
+    //4. Reduce Bracketed Substrings
+    Parser.reduceBracketedExpressions(nodeList, signature, symbolTable, tokenString);
+
+    //5. Reduce Function Applications
+    //Parser.reduceFunctionApplications(nodeList, signature, symbolTable, tokenString);
     fs.writeFileSync("temp.json", JSON.stringify(nodeList.toArray().map(element => element["reducedNodeObject"]()), null, 2));
 
-    //5. Reduce Operator Applications
+    //6. Reduce Operator Applications
   }
 
   /**
-   * //What it does
-   * This algorithm pre processes the token string so it can be further parsed
-   * in linear time and handle error reporting gracefully.
-   * 
-   * Tokens are wrapped either using [[TokenWrapper]] class or, in case they are
-   * a round brackets, using [[BracketWrapper]] and then put into a [[LinkedList]].
-   * 
-   * A [[TokenWrapper]] is a token bundled with two additional properties:
-   * 
-   * 1. Its corresponding [[TokenString]] offset, so later when other tokens 
-   * (mostly brackets) are  inserted/removes, if there is any error we can still 
-   * point to the tokens that caused the error in the input string itself, 
-   * othwerise we would only be able to report errors based on a half processed 
-   * string where tokens would possibly be out of their original position.
-   * 2. An `active` flag that indicates whether a given token may act as an
-   * active operator and thus bind surrounding tokens as arguments to itself. 
-   * This is necessary to differentiate whether a given token (should it be an
-   * operator) is acting as an operator and thus will take arguments, or if
-   * it is acting as an operand and therefore should not perform argument binding.
-   * 
-   * A [[BracketWrapper]] is a subclass of a [[TokenWrapper]] and additionally
-   * holds a [[LinkedListIterator]] that points to the matching [[BracketWrapper]],
-   * that is, if there is one.
-   * 
-   * So, for instance, in the sentence "((2+3)*4)", the first left bracket is
-   * matched by the last right bracket, and the second left bracket matches the
-   * first right bracket.
-   * 
-   * This is done to enable linear time string traversal when parsing, because
-   * due to mixfix operators parsing, with "linked" matching brackets whenever
-   * we need to scan an argument of a given operator, if it is enclosed inside
-   * (possibly multiple nested levels) brackets we don't need to step one token
-   * at a time to find the matching bracket, we just "jump" to the matching
-   * bracket using the iterator referenced in [[BracketWrapper]].
-   * 
-   * Mind that bracket matching is easily done in linear time.
-   * 
-   * If we didn't use this technique of storing iterators to matching brackets
-   * we would end up scanning the same tokens many times and the argument resolution
-   * algorithm for mixfix operators would have at least quadratic time complexity.
-   * 
-   * Also, wrapped tokens are contained in a linked list and not an array/vector,
-   * because the parsing algorithm works by inserting/removing brackets and other
-   * tokens (like commas, for example) and so we need constant time insertion/
-   * deletion to keep the parsing algorithm linear.
-   * 
-   * //How it does
-   * The algorithm both wraps tokens and matches brackets, while also collecting
-   * umatched brackets for further error reporting.
-   * 
-   * Bracket matching can be done using a stack where encountered left brackets
-   * are kept and every time a right bracket is found the last pushed left
-   * bracket is popped.
-   * 
-   * If a right bracket is found and the stack is empty, or if the stack is
-   * not empty by the time the string has been fully scanned it means that 
-   * there are unmatched brackets.
-   * 
-   * So, the algorithm iterates through the [[TokenString]] wrapping each [[Token]]
-   * either in a [[TokenWrapper]] if it is not a bracket and in a [[BracketWrapper]]
-   * otherwise.
-   * 
-   * Whenever control stumbles upon a *left* bracket it also adds an iterator
-   * pointing to the bracket ([[BracketWrapper]]) to `leftBracketIteratorStack`.
-   * 
-   * This stack is used both to match brackets and to keep track of unmatched
-   * brackets.
-   * 
-   * When control finds a *right* bracket it first checks `leftBracketIteratorStack`,
-   * for if it is not empty it pops the last iterator and assigns it to the
-   * right bracket wrapper and vice versa.
-   * 
-   * If the stack is empty when a right bracket is found, it means that this
-   * right bracket doesn't match any left brackets so it is pushed to 
-   * `unmatchedRigthBracketList`.
-   * 
-   * When the input string has been fully scanned, if there are any left
-   * brackets (actually iterators, but you get the idea) left in 
-   * `leftBracketIteratorStack` it means that these brackets are unmatched.
-   * 
    * @param tokenString 
    */
   private static convertTokenStringToNodeListAndHandleBrackets(tokenString : TokenString) : LinkedList<ParseTreeNode>
@@ -123,7 +46,7 @@ export class Parser
       const currentToken = tokenString.tokenAt(offset);
       if(currentToken.toString() === "(")
       {
-        const leftBracketNode = new ParseTreeBracketNode(tokenString, offset, offset);
+        const leftBracketNode = new ParseTreeNode(tokenString, offset, offset);
         tokenNodeList.push(leftBracketNode);
 
         const leftBracketNodeIterator = tokenNodeList.iteratorAtLast();
@@ -131,7 +54,7 @@ export class Parser
       }
       else if(currentToken.toString() === ")")
       {
-        const rightBracketNode = new ParseTreeBracketNode(tokenString, offset, offset);
+        const rightBracketNode = new ParseTreeNode(tokenString, offset, offset);
         tokenNodeList.push(rightBracketNode);
         
         if(leftBracketIteratorStack.length === 0)
@@ -140,11 +63,7 @@ export class Parser
         }
         else
         {
-          const mostRecentLeftBracketNodeIterator = leftBracketIteratorStack.pop() as LinkedListIterator<ParseTreeBracketNode>;
-          const rightBracketNodeIterator = tokenNodeList.iteratorAtLast(); //Because the most
-          //recently added token is exactly the right bracket under analysis
-          mostRecentLeftBracketNodeIterator.get().matchingBracketNodeIterator = rightBracketNodeIterator as LinkedListIterator<ParseTreeBracketNode>;
-          rightBracketNode.matchingBracketNodeIterator = mostRecentLeftBracketNodeIterator;
+          leftBracketIteratorStack.pop();
         }
       }
       else
@@ -163,6 +82,99 @@ export class Parser
     }
 
     return tokenNodeList;
+  }
+
+  /**
+   * 
+   * @param nodeList (out)
+   * @param singature 
+   * @param symbolTable 
+   */
+  private static reduceBracketedExpressions(nodeList : LinkedList<ParseTreeNode>, singature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable, inputTokenString : TokenString) : void
+  {
+    let iteratorAtCurrentNode = nodeList.iteratorAtHead();
+    let nodeListEndHasBeenReached = iteratorAtCurrentNode.isValid();
+    while(nodeListEndHasBeenReached)
+    {
+      if(Parser.iteratorIsAtFunctionApplicationStartingPoint(iteratorAtCurrentNode, symbolTable))
+      {
+        iteratorAtCurrentNode = iteratorAtCurrentNode.goToNext().goToNext();
+      }
+      else if(iteratorAtCurrentNode.get().getCorrespondingInputSubstring().toString() === "(")
+      {
+        const reducedBracketedExpressionNode = new ParseTreeNode(inputTokenString);
+        const listWrappedBracketedExpression = new LinkedList<ParseTreeNode>();
+        reducedBracketedExpressionNode.children.push(listWrappedBracketedExpression);
+        nodeList.insertBefore(iteratorAtCurrentNode, reducedBracketedExpressionNode);
+
+        iteratorAtCurrentNode = Parser.reduceSingleBracketedExpression(iteratorAtCurrentNode, reducedBracketedExpressionNode, listWrappedBracketedExpression, nodeList, symbolTable, inputTokenString);
+
+        //Remove Right Closing Bracket
+        iteratorAtCurrentNode = nodeList.remove(iteratorAtCurrentNode);
+      }
+      else
+      {
+        iteratorAtCurrentNode = iteratorAtCurrentNode.goToNext();
+      }
+      
+      nodeListEndHasBeenReached = iteratorAtCurrentNode.isValid();
+    }
+
+  }
+
+  private static reduceSingleBracketedExpression(iteratorAtOpeningLeftBracket : LinkedListIterator<ParseTreeNode>, reducedBracketedExpressionNode : ParseTreeNode, listWrappedBracketedExpression : LinkedList<ParseTreeNode>, topLevelNodeList : LinkedList<ParseTreeNode>, symbolTable : FunctionalSymbolsAndOperatorsTable, inputTokenString : TokenString) : LinkedListIterator<ParseTreeNode>
+  {
+    reducedBracketedExpressionNode.substringBeginOffset = iteratorAtOpeningLeftBracket.get().substringBeginOffset;
+
+    //Remove Left Opening Bracket
+    let iteratorAtCurrentNode = topLevelNodeList.remove(iteratorAtOpeningLeftBracket);
+
+    let functionalApplicationDepth = 0;
+    while(true)
+    {
+      if(Parser.iteratorIsAtFunctionApplicationStartingPoint(iteratorAtCurrentNode, symbolTable))
+      {
+        functionalApplicationDepth++;
+        //In this case brackets are transfered instead of removed!
+
+        //Transfer Functional Symbol
+        iteratorAtCurrentNode = topLevelNodeList.transferNodeToEnd(iteratorAtCurrentNode, listWrappedBracketedExpression);
+
+        //Transfer Left Opening Bracket
+        iteratorAtCurrentNode = topLevelNodeList.transferNodeToEnd(iteratorAtCurrentNode, listWrappedBracketedExpression);
+      }
+      else if(iteratorAtCurrentNode.get().getCorrespondingInputSubstring().toString() === "(")
+      {
+        const nestedReducedBracketedExpressionNode = new ParseTreeNode(inputTokenString);
+        const nestedListWrappedBracketedExpression = new LinkedList<ParseTreeNode>();
+        nestedReducedBracketedExpressionNode.children.push(nestedListWrappedBracketedExpression);
+        listWrappedBracketedExpression.push(nestedReducedBracketedExpressionNode);
+
+        iteratorAtCurrentNode = this.reduceSingleBracketedExpression(iteratorAtCurrentNode, nestedReducedBracketedExpressionNode, nestedListWrappedBracketedExpression, topLevelNodeList, symbolTable, inputTokenString);
+
+        iteratorAtCurrentNode = topLevelNodeList.remove(iteratorAtCurrentNode);
+      }
+      else if(iteratorAtCurrentNode.get().getCorrespondingInputSubstring().toString() === ")")
+      {
+        if(functionalApplicationDepth === 0)
+        {
+          break;
+        }
+        else
+        {
+          functionalApplicationDepth--;
+          iteratorAtCurrentNode = topLevelNodeList.transferNodeToEnd(iteratorAtCurrentNode, listWrappedBracketedExpression);
+        }
+      }
+      else
+      {
+        iteratorAtCurrentNode = topLevelNodeList.transferNodeToEnd(iteratorAtCurrentNode, listWrappedBracketedExpression);
+      }
+    }
+
+    reducedBracketedExpressionNode.substringEndOffset = iteratorAtCurrentNode.get().substringEndOffset;
+
+    return iteratorAtCurrentNode;
   }
 
   /**
@@ -453,8 +465,9 @@ export class Parser
     }
   }
 
-  private static generateOperatorsIteratorQueue(nodeList : LinkedList<ParseTreeNode>, symbolTable : FunctionalSymbolsAndOperatorsTable) : Array<LinkedListIterator<ParseTreeNode>>
+  private static generateFunctionalSymbolsAndOperatorsIteratorQueue(nodeList : LinkedList<ParseTreeNode>, symbolTable : FunctionalSymbolsAndOperatorsTable) : [Array<LinkedListIterator<ParseTreeNode>>, Array<LinkedListIterator<ParseTreeNode>>]
   {
+    const functionalSymbolsIteratorQueue = [];
     const operatorsIteratorQueue = [];
     
     const highestPrecedenceRank = Array.from(symbolTable.getOperatorsRecordsTable().values()).reduce((highestPrecedenceRank, record) => 
@@ -484,7 +497,11 @@ export class Parser
       const currentNode = nodeListIterator.get();
       const token = currentNode.getCorrespondingInputSubstring().toString();
       const nodeOperatorRecord = symbolTable.getOperatorRecord(token);
-      if(nodeOperatorRecord !== undefined)
+      if(Parser.iteratorIsAtFunctionApplicationStartingPoint(nodeListIterator, symbolTable))
+      {
+        functionalSymbolsIteratorQueue.push(nodeListIterator.clone());
+      }
+      else if(nodeOperatorRecord !== undefined)
       {
         const tableIndex = nodeOperatorRecord.precedence;
         if(nodeOperatorRecord.associativity === OperatorAssociativity.Left)
@@ -509,7 +526,7 @@ export class Parser
       }
     }
 
-    return operatorsIteratorQueue;
+    return [functionalSymbolsIteratorQueue, operatorsIteratorQueue];
   }
 
 
