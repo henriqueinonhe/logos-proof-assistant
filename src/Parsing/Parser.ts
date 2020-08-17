@@ -6,6 +6,7 @@ import { TokenString } from "../Token/TokenString";
 import { InvalidArgumentException } from "../Utils/LogosUtils";
 import { ParseTreeNode as ParseTreeNode } from "./ParseTreeNode";
 import { ParseTreeBracketNode } from "./ParseTreeBracketNode";
+import { OperatorAssociativity } from "./OperatorRecord";
 
 export class Parser
 {
@@ -15,11 +16,16 @@ export class Parser
     const tokenString = lexer.lex(string, signature);
 
     //2. Wrap Token String and perform Bracket Matching
-    const nodeList = this.convertTokenStringToNodeListAndHandleBrackets(tokenString);
+    const nodeList = Parser.convertTokenStringToNodeListAndHandleBrackets(tokenString);
     
-    //3. 
+    //3. Iterators to Tokens For Further Processing
+    const operatorsIteratorQueue = Parser.generateOperatorsIteratorQueue(nodeList, symbolTable);
+
+    //4. Reduce Function Applications
     Parser.reduceFunctionApplications(nodeList, signature, symbolTable, tokenString);
-    console.log(JSON.stringify(nodeList.toArray().map(element => element["reducedNodeObject"]())));
+    //console.log(JSON.stringify(nodeList.toArray().map(element => element["reducedNodeObject"]())));
+
+    //5. Reduce Operator Applications
   }
 
   /**
@@ -169,14 +175,14 @@ export class Parser
    * functional symbol to the last ")" of the last argument list) and substitutes
    * it by a single node.
    * 
-   * @param tokenNodeList (out)
+   * @param nodeList (out)
    * @param signature 
    * @param symbolTable 
    */
-  private static reduceFunctionApplications(tokenNodeList : LinkedList<ParseTreeNode>, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable, inputTokenString : TokenString) : void
+  private static reduceFunctionApplications(nodeList : LinkedList<ParseTreeNode>, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable, inputTokenString : TokenString) : void
   {
-    let currentNodeIterator = tokenNodeList.iteratorAtHead();
-    let nodeListEndHasBeenReached = !currentNodeIterator.isValid(); //
+    let currentNodeIterator = nodeList.iteratorAtHead();
+    let nodeListEndHasBeenReached = !currentNodeIterator.isValid();
     while(!nodeListEndHasBeenReached)
     {
       if(Parser.iteratorIsAtFunctionApplicationStartingPoint(currentNodeIterator, symbolTable))
@@ -187,7 +193,6 @@ export class Parser
       }
 
       currentNodeIterator = currentNodeIterator.goToNext();
-
       nodeListEndHasBeenReached = !currentNodeIterator.isValid();
     }
   }
@@ -257,9 +262,10 @@ export class Parser
       {
         iteratorAtCurrentArgumentListOpeningBracket = topLevelNodeList.remove(iteratorAtCurrentArgumentListClosingBracket);
       }
-      const reduceFunctionArgumentListReturnValues = Parser.reduceFunctionArgumentList(topLevelNodeList, iteratorAtCurrentArgumentListOpeningBracket, signature, symbolTable, inputTokenString);
-      [iteratorAtCurrentArgumentListClosingBracket] = reduceFunctionArgumentListReturnValues;
-      const [, argumentNodeListArray] = reduceFunctionArgumentListReturnValues;
+
+      const parseFunctionArgumentListReturnValues = Parser.parseFunctionArgumentList(topLevelNodeList, iteratorAtCurrentArgumentListOpeningBracket, signature, symbolTable, inputTokenString);
+      [iteratorAtCurrentArgumentListClosingBracket] = parseFunctionArgumentListReturnValues;
+      const [, argumentNodeListArray] = parseFunctionArgumentListReturnValues;
 
       if(isFirstArgumentList)
       {
@@ -290,21 +296,21 @@ export class Parser
         topLevelNodeList.transferNodeToEnd(iteratorAtFormerTopLevelFunctionApplicationReducedNode, listWrappedFormerTopLevelFunctionApplicationReducedNode);
         topLevelFunctionApplicationReducedNode.children.push(listWrappedFormerTopLevelFunctionApplicationReducedNode);
       }
-
-      //Remove Last Closing Bracket
-      topLevelNodeList.remove(iteratorAtCurrentArgumentListClosingBracket);
-
+      
       //Append Arguments
       for(const argumentNodeList of argumentNodeListArray)
       {
         topLevelFunctionApplicationReducedNode.children.push(argumentNodeList);
       }
     } while(Parser.hasNextArgumentList(iteratorAtCurrentArgumentListClosingBracket));
+    
+    //Remove Last Closing Bracket
+    topLevelNodeList.remove(iteratorAtCurrentArgumentListClosingBracket);
 
     return iteratorAtTopLevelFunctionApplicationReducedNode;
   }
 
-  private static reduceFunctionArgumentList(topLevelNodeList : LinkedList<ParseTreeNode>, iteratorAtOpeningLeftBracket : LinkedListIterator<ParseTreeNode>, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable, inputTokenString : TokenString) : [LinkedListIterator<ParseTreeNode>, Array<LinkedList<ParseTreeNode>>]
+  private static parseFunctionArgumentList(topLevelNodeList : LinkedList<ParseTreeNode>, iteratorAtOpeningLeftBracket : LinkedListIterator<ParseTreeNode>, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable, inputTokenString : TokenString) : [LinkedListIterator<ParseTreeNode>, Array<LinkedList<ParseTreeNode>>]
   {
     const argumentNodeListArray = [];
     let iteratorAtCurrentArgumentFirstNode;
@@ -441,14 +447,84 @@ export class Parser
       return string;
     }
   }
-  private static removeNodesFromList(list : LinkedList<ParseTreeNode>, begin : LinkedListIterator<ParseTreeNode>, end : LinkedListIterator<ParseTreeNode>) : void
 
+  private static generateOperatorsIteratorQueue(nodeList : LinkedList<ParseTreeNode>, symbolTable : FunctionalSymbolsAndOperatorsTable) : Array<LinkedListIterator<ParseTreeNode>>
   {
-    const iterator = begin.clone();
-    while(iterator["node"] !== end["node"])
+    const operatorsIteratorQueue = [];
+    
+    const highestPrecedenceRank = Array.from(symbolTable.getOperatorsRecordsTable().values()).reduce((highestPrecedenceRank, record) => 
     {
-      list.remove(iterator);
+      if(highestPrecedenceRank >= record.precedence)
+      {
+        return highestPrecedenceRank;
+      }
+      else
+      {
+        return record.precedence;
+      }
+    }, 0);
+
+    
+    const operatorsIteratorTable : Array<LinkedList<LinkedListIterator<ParseTreeNode>>> = [];
+    //Initializing Table
+    for(let index = 0; index <= highestPrecedenceRank; index++)
+    {
+      operatorsIteratorTable.push(new LinkedList()); //For constant time append and unshift
+    }
+    
+    //Filling Table
+    const nodeListIterator = new LinkedListIterator(nodeList);
+    while(nodeListIterator.isValid())
+    {
+      const currentNode = nodeListIterator.get();
+      const token = currentNode.getCorrespondingInputSubstring().toString();
+      const nodeOperatorRecord = symbolTable.getOperatorRecord(token);
+      if(nodeOperatorRecord !== undefined)
+      {
+        const tableIndex = nodeOperatorRecord.precedence;
+        if(nodeOperatorRecord.associativity === OperatorAssociativity.Left)
+        {
+          operatorsIteratorTable[tableIndex].push(nodeListIterator.clone());
+        }
+        else
+        {
+          operatorsIteratorTable[tableIndex].unshift(nodeListIterator.clone());
+        }
+      }
+
+      nodeListIterator.goToNext();
+    }
+
+    //Converting Table To Queue
+    for(const list of operatorsIteratorTable)
+    {
+      for(const iterator of list)
+      {
+        operatorsIteratorQueue.push(iterator);
+      }
+    }
+
+    return operatorsIteratorQueue;
+  }
+
+
+  private static reduceOperatorApplications(operatorsIteratorQueue : Array<LinkedListIterator<ParseTreeNode>>, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable) : void
+  {
+    for(const operatorIterator of operatorsIteratorQueue)
+    {
+      const operatorToken = operatorIterator.get().getCorrespondingInputSubstring().toString();
+      const operatorRecord = symbolTable.getOperatorRecord(operatorToken);
+      const {arity, operatorPosition}  = operatorRecord!;
+      const numberOfExpectedOperandsBeforeOperator = operatorPosition;
+      const numberOfExpectedOperandsAfterOperator = arity - operatorPosition;
+      
     }
   }
+  
 }
+
+
+
+
+
 

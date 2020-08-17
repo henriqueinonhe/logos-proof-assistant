@@ -153,6 +153,41 @@ export class FunctionalSymbolsAndOperatorsTable
     return this.operatorsRecordsTable.get(token);
   }
 
+  /**
+   * Returns functional symbols set by value.
+   * Const.
+   * 
+   * Pre Conditions:
+   * None
+   */
+  public getFunctionalSymbolsSet() : Set<string>
+  {
+    const cloneFunctionalSymbolsSet = new Set<string>();
+    for(const token of this.functionalSymbolsSet)
+    {
+      cloneFunctionalSymbolsSet.add(token);
+    }
+    return cloneFunctionalSymbolsSet;
+  }
+
+  /**
+   * Returns operators records table by value.
+   * Const.
+   * 
+   * Pre Conditions:
+   * None
+   */
+  public getOperatorsRecordsTable() : Map<string, OperatorRecord>
+  {
+    const cloneOperatorsRecordsTable = new Map<string, OperatorRecord>();
+    for(const token of this.operatorsRecordsTable.keys())
+    {
+      const currentRecord = this.operatorsRecordsTable.get(token)!.clone();
+      cloneOperatorsRecordsTable.set(token, currentRecord);
+    }
+    return cloneOperatorsRecordsTable;
+  }
+
   private functionalSymbolsSet : Set<string>;
   private operatorsRecordsTable : Map<string, OperatorRecord>;
 }

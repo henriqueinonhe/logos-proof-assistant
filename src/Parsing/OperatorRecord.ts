@@ -54,6 +54,18 @@ export class OperatorRecord
     this.associativity = associativity;
   }
 
+  /**
+   * Deep copy.
+   * Const.
+   * 
+   * Pre Conditions:
+   * None
+   */
+  public clone() : OperatorRecord
+  {
+    return new OperatorRecord(this.arity, this.operatorPosition, this.precedence, this.associativity);
+  }
+
   public arity : number;
   public operatorPosition : number;
   public precedence : number;

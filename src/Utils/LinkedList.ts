@@ -695,13 +695,13 @@ export class LinkedList<T>
    * @param targetList 
    * @param targetListIterator 
    */
-  public transferNodeAfter(sourceListIterator : LinkedListIterator<T>, targetList : LinkedList<T>, targetListIterator : LinkedListIterator<T>) : void
+  public transferNodeAfter(sourceListIterator : LinkedListIterator<T>, targetList : LinkedList<T>, targetListIterator : LinkedListIterator<T>) : LinkedListIterator<T>
   {
     this.checkIteratorValidity(sourceListIterator);
     targetList.checkIteratorValidity(targetListIterator);
 
     //Remove Node From This List
-    this.remove(sourceListIterator);
+    const returnedIterator = this.remove(sourceListIterator);
 
     //Insert Node At Target List
     const transferedNode = sourceListIterator["node"];
@@ -721,6 +721,7 @@ export class LinkedList<T>
     transferedNode!.next = afterInsertedNode;
 
     targetList.length++;
+    return returnedIterator;
   }
 
   /**
@@ -735,13 +736,13 @@ export class LinkedList<T>
    * @param targetList 
    * @param targetListIterator 
    */
-  public transferNodeBefore(sourceListIterator : LinkedListIterator<T>, targetList : LinkedList<T>, targetListIterator : LinkedListIterator<T>) : void
+  public transferNodeBefore(sourceListIterator : LinkedListIterator<T>, targetList : LinkedList<T>, targetListIterator : LinkedListIterator<T>) : LinkedListIterator<T>
   {
     this.checkIteratorValidity(sourceListIterator);
     targetList.checkIteratorValidity(targetListIterator);
 
     const transferedNode = sourceListIterator["node"];
-    this.remove(sourceListIterator);
+    const returnedIterator = this.remove(sourceListIterator);
 
     //Insert Node At Target List
     transferedNode!.list = targetList; //Transfering node ownership to new list
@@ -762,6 +763,8 @@ export class LinkedList<T>
     transferedNode!.next = afterInsertedNode;
 
     targetList.length++;
+
+    return returnedIterator;
   }
 
   public transferNodeToEnd(sourceListIterator : LinkedListIterator<T>, targetList : LinkedList<T>) : LinkedListIterator<T>

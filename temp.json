@@ -1,25 +1,217 @@
 [
   {
-    "substring": "f(1)",
-    "substringBeginOffset": 0,
-    "substringEndOffset": 3,
     "children": [
       [
         {
-          "substring": "f",
+          "children": [
+            [
+              {
+                "children": [
+                  [
+                    {
+                      "children": [],
+                      "substring": "f",
+                      "substringBeginOffset": 0,
+                      "substringEndOffset": 0
+                    }
+                  ],
+                  [
+                    {
+                      "children": [],
+                      "substring": "0",
+                      "substringBeginOffset": 2,
+                      "substringEndOffset": 2
+                    },
+                    {
+                      "children": [],
+                      "substring": " ",
+                      "substringBeginOffset": 3,
+                      "substringEndOffset": 3
+                    },
+                    {
+                      "children": [],
+                      "substring": " ",
+                      "substringBeginOffset": 5,
+                      "substringEndOffset": 5
+                    },
+                    {
+                      "children": [],
+                      "substring": "1",
+                      "substringBeginOffset": 6,
+                      "substringEndOffset": 6
+                    }
+                  ],
+                  [
+                    {
+                      "children": [
+                        [
+                          {
+                            "children": [],
+                            "substring": "f",
+                            "substringBeginOffset": 9,
+                            "substringEndOffset": 9
+                          }
+                        ],
+                        [
+                          {
+                            "children": [],
+                            "substring": "1",
+                            "substringBeginOffset": 11,
+                            "substringEndOffset": 11
+                          },
+                          {
+                            "children": [],
+                            "substring": " ",
+                            "substringBeginOffset": 12,
+                            "substringEndOffset": 12
+                          },
+                          {
+                            "children": [],
+                            "substring": " ",
+                            "substringBeginOffset": 14,
+                            "substringEndOffset": 14
+                          },
+                          {
+                            "children": [],
+                            "substring": "1",
+                            "substringBeginOffset": 15,
+                            "substringEndOffset": 15
+                          }
+                        ],
+                        [
+                          {
+                            "children": [
+                              [
+                                {
+                                  "children": [],
+                                  "substring": "f",
+                                  "substringBeginOffset": 18,
+                                  "substringEndOffset": 18
+                                }
+                              ],
+                              [
+                                {
+                                  "children": [],
+                                  "substring": "0",
+                                  "substringBeginOffset": 20,
+                                  "substringEndOffset": 20
+                                }
+                              ]
+                            ],
+                            "substring": "f(0)",
+                            "substringBeginOffset": 18,
+                            "substringEndOffset": 21
+                          }
+                        ]
+                      ],
+                      "substring": "f(1 + 1, f(0))",
+                      "substringBeginOffset": 9,
+                      "substringEndOffset": 22
+                    },
+                    {
+                      "children": [],
+                      "substring": " ",
+                      "substringBeginOffset": 23,
+                      "substringEndOffset": 23
+                    },
+                    {
+                      "children": [],
+                      "substring": " ",
+                      "substringBeginOffset": 25,
+                      "substringEndOffset": 25
+                    },
+                    {
+                      "children": [],
+                      "substring": "1",
+                      "substringBeginOffset": 26,
+                      "substringEndOffset": 26
+                    }
+                  ]
+                ],
+                "substring": "f(0 + 1, f(1 + 1, f(0)) + 1)",
+                "substringBeginOffset": 0,
+                "substringEndOffset": 27
+              }
+            ],
+            [
+              {
+                "children": [],
+                "substring": "1",
+                "substringBeginOffset": 29,
+                "substringEndOffset": 29
+              },
+              {
+                "children": [],
+                "substring": " ",
+                "substringBeginOffset": 30,
+                "substringEndOffset": 30
+              },
+              {
+                "children": [],
+                "substring": " ",
+                "substringBeginOffset": 32,
+                "substringEndOffset": 32
+              },
+              {
+                "children": [],
+                "substring": "1",
+                "substringBeginOffset": 33,
+                "substringEndOffset": 33
+              }
+            ]
+          ],
+          "substring": "f(0 + 1, f(1 + 1, f(0)) + 1)(1 + 1)",
           "substringBeginOffset": 0,
-          "substringEndOffset": 0,
-          "children": []
+          "substringEndOffset": 34
         }
       ],
       [
         {
-          "substring": "1",
-          "substringBeginOffset": 2,
-          "substringEndOffset": 2,
-          "children": []
+          "children": [],
+          "substring": "0",
+          "substringBeginOffset": 36,
+          "substringEndOffset": 36
+        },
+        {
+          "children": [],
+          "substring": " ",
+          "substringBeginOffset": 37,
+          "substringEndOffset": 37
+        },
+        {
+          "children": [],
+          "substring": " ",
+          "substringBeginOffset": 39,
+          "substringEndOffset": 39
+        },
+        {
+          "children": [],
+          "substring": "0",
+          "substringBeginOffset": 40,
+          "substringEndOffset": 40
         }
       ]
-    ]
+    ],
+    "substring": "f(0 + 1, f(1 + 1, f(0)) + 1)(1 + 1)(0 + 0)",
+    "substringBeginOffset": 0,
+    "substringEndOffset": 41
+  },
+  {
+    "children": [],
+    "substring": " ",
+    "substringBeginOffset": 42,
+    "substringEndOffset": 42
+  },
+  {
+    "children": [],
+    "substring": " ",
+    "substringBeginOffset": 44,
+    "substringEndOffset": 44
+  },
+  {
+    "children": [],
+    "substring": "1",
+    "substringBeginOffset": 45,
+    "substringEndOffset": 45
   }
 ]
