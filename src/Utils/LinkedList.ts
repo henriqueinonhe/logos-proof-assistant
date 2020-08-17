@@ -800,6 +800,36 @@ export class LinkedList<T>
     return returnedIterator;
   }
 
+  //TEST THIS SHIT
+  public transferNodeToBegin(sourceListIterator : LinkedListIterator<T>, targetList : LinkedList<T>) : LinkedListIterator<T>
+  {
+    this.checkIteratorValidity(sourceListIterator);
+
+    const returnedIterator = this.remove(sourceListIterator);
+
+    //Insert Node At Target List
+    const transferedNode = sourceListIterator["node"];
+    transferedNode!.previous = null;
+    transferedNode!.list = targetList; //Transfering node ownership to new list
+    if(targetList.isEmpty())
+    {
+      targetList.head = transferedNode;
+      targetList.last = transferedNode;
+      targetList.length = 1;
+    }
+    else
+    {
+      const afterInsertedNode = targetList.iteratorAtHead()["node"]; //Friendship access
+      targetList.head = transferedNode;
+      afterInsertedNode!.previous = transferedNode;
+      transferedNode!.next = afterInsertedNode;
+    
+      targetList.length++;
+    }
+
+    return returnedIterator;
+  }
+
   private head : LinkedListNode<T> | null;
   private last : LinkedListNode<T> | null;
   private length : number;

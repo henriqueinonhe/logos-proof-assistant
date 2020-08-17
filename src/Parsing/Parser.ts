@@ -513,17 +513,103 @@ export class Parser
   }
 
 
-  private static reduceOperatorApplications(operatorsIteratorQueue : Array<LinkedListIterator<ParseTreeNode>>, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable) : void
+  private static reduceOperatorApplications(operatorsIteratorQueue : Array<LinkedListIterator<ParseTreeNode>>, inputTokenString : TokenString, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable) : void
   {
-    for(const operatorIterator of operatorsIteratorQueue)
+    for(const iteratorAtOperator of operatorsIteratorQueue)
     {
-      const operatorToken = operatorIterator.get().getCorrespondingInputSubstring().toString();
+      const topLevelNodeList = iteratorAtOperator.getList();
+      const operatorIsOperand = topLevelNodeList.size() === 1;
+      if(operatorIsOperand)
+      {
+        continue;
+      }
+
+      const operatorToken = iteratorAtOperator.get().getCorrespondingInputSubstring().toString();
       const operatorRecord = symbolTable.getOperatorRecord(operatorToken);
       const {arity, operatorPosition}  = operatorRecord!;
-      const numberOfExpectedOperandsBeforeOperator = operatorPosition;
-      const numberOfExpectedOperandsAfterOperator = arity - operatorPosition;
+      const numberOfExpectedLeftOperands = operatorPosition;
+      const numberOfExpectedRightOperands = arity - operatorPosition;
+      const operatorApplicationReducedNode = new ParseTreeNode(inputTokenString);
+      const operandsNodeListList = new LinkedList<LinkedList<ParseTreeNode>>(); //Constant Time Insertion
 
+      //Left Operands
+      for(let leftOperandCounter = 0, iteratorAtCurrentNode = iteratorAtOperator.clone(); 
+        leftOperandCounter < numberOfExpectedLeftOperands; 
+        leftOperandCounter++)
+      {
+        const currentOperandNodeList = new LinkedList<ParseTreeNode>();
+        const currentNode = iteratorAtCurrentNode.get();
+        if(currentNode.isSingleToken())
+        {
+          Parser.checkExpectedToken(iteratorAtCurrentNode, signature, ["TypedToken", "VariableToken", "VariableBindingToken", "RightRoundBracketToken"]);
+          const currentNodeSort = signature.getRecord(currentNode.getCorrespondingInputSubstring().toString()).sort();
+
+          if(currentNodeSort === "RightRoundBracket")
+          {
+            //Encapsulate Node
+          }
+          else
+          {
+            iteratorAtCurrentNode = topLevelNodeList.transferNodeToEnd(iteratorAtCurrentNode, currentOperandNodeList).goToPrevious();
+            operandsNodeListList.unshift(currentOperandNodeList);
+          }
+        }
+        else
+        {
+          //Is Compound Node
+          iteratorAtCurrentNode = topLevelNodeList.transferNodeToEnd(iteratorAtCurrentNode, currentOperandNodeList).goToPrevious();
+          operandsNodeListList.unshift(currentOperandNodeList);
+        }
+      }
+      
+      //Right Operands
+      for(let rightOperandCounter = 0, iteratorAtCurrentNode = iteratorAtOperator.clone(); 
+        rightOperandCounter < numberOfExpectedRightOperands; 
+        rightOperandCounter++)
+      {
+        const currentOperandNodeList = new LinkedList<ParseTreeNode>();
+        const currentNode = iteratorAtCurrentNode.get();
+        if(currentNode.isSingleToken())
+        {
+          Parser.checkExpectedToken(iteratorAtCurrentNode, signature, ["TypedToken", "VariableToken", "VariableBindingToken", "LeftRoundBracketToken"]);
+          const currentNodeSort = signature.getRecord(currentNode.getCorrespondingInputSubstring().toString()).sort();
+
+          if(currentNodeSort === "LeftRoundBracket")
+          {
+            //Encapsulate Node
+          }
+          else
+          {
+            iteratorAtCurrentNode = topLevelNodeList.transferNodeToEnd(iteratorAtCurrentNode, currentOperandNodeList);
+            operandsNodeListList.unshift(currentOperandNodeList);
+          }
+        }
+        else
+        {
+          //Is Compound Node
+          iteratorAtCurrentNode = topLevelNodeList.transferNodeToEnd(iteratorAtCurrentNode, currentOperandNodeList);
+          operandsNodeListList.unshift(currentOperandNodeList);
+        }
+      }
+
+      //Inserting Operator Application Reduced Node
+      topLevelNodeList.insertBefore(iteratorAtOperator, operatorApplicationReducedNode);
+
+      //Setting Operator Application Reduced Node Children (operator and operands)
+      const listWrappedOperatorNode = new LinkedList<ParseTreeNode>();
+      topLevelNodeList.transferNodeToEnd(iteratorAtOperator, listWrappedOperatorNode);
+
+      const operatorApplicationReducedNodeChildrenAsList = operandsNodeListList;
+      operatorApplicationReducedNodeChildrenAsList.unshift(listWrappedOperatorNode);
+      operatorApplicationReducedNode.children = operatorApplicationReducedNodeChildrenAsList.toArray();
+
+      //Remove Excess Brackets
     }
+  }
+
+  private static reduceBracketedSubstring() : void
+  {
+
   }
   
 }

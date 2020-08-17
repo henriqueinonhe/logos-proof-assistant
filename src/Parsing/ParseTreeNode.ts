@@ -60,6 +60,11 @@ export class ParseTreeNode
     };
   }
 
+  public isSingleToken() : boolean
+  {
+    return this.children.length === 0;
+  }
+
   private inputTokenString : TokenString;
   //public parent : ParseTreeNode | null;
   public children : Array<LinkedList<ParseTreeNode>>;

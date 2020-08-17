@@ -9,7 +9,6 @@ import { LinkedList, LinkedListIterator } from "../../src/Utils/LinkedList";
 import { ParseTreeNode } from "../../src/Parsing/ParseTreeNode";
 import { Lexer } from "../../src/Lexing/Lexer";
 import { Signature } from "../../src/Lexing/Signature";
-import { ParseTree } from "../../src/Parsing/ParseTree";
 import { OperatorAssociativity } from "../../src/Parsing/OperatorRecord";
 
 const lexer = new LogosLexer();
