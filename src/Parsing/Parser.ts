@@ -7,6 +7,7 @@ import { InvalidArgumentException } from "../Utils/LogosUtils";
 import { ParseTreeNode as ParseTreeNode } from "./ParseTreeNode";
 import { ParseTreeBracketNode } from "./ParseTreeBracketNode";
 import { OperatorAssociativity } from "./OperatorRecord";
+import fs from "fs";
 
 export class Parser
 {
@@ -23,7 +24,7 @@ export class Parser
 
     //4. Reduce Function Applications
     Parser.reduceFunctionApplications(nodeList, signature, symbolTable, tokenString);
-    //console.log(JSON.stringify(nodeList.toArray().map(element => element["reducedNodeObject"]())));
+    fs.writeFileSync("temp.json", JSON.stringify(nodeList.toArray().map(element => element["reducedNodeObject"]()), null, 2));
 
     //5. Reduce Operator Applications
   }
@@ -183,6 +184,8 @@ export class Parser
   {
     let currentNodeIterator = nodeList.iteratorAtHead();
     let nodeListEndHasBeenReached = !currentNodeIterator.isValid();
+    //Ignore Leading Whitespace
+    currentNodeIterator = Parser.ignoreWhitespace(nodeList, currentNodeIterator, signature);
     while(!nodeListEndHasBeenReached)
     {
       if(Parser.iteratorIsAtFunctionApplicationStartingPoint(currentNodeIterator, symbolTable))
@@ -191,8 +194,9 @@ export class Parser
         const iteratorAtFunctionApplicationReducedNode = Parser.reduceSingleFunctionApplication(iteratorAtFunctionalSymbol, signature, symbolTable, inputTokenString);
         currentNodeIterator = iteratorAtFunctionApplicationReducedNode;
       }
-
+      
       currentNodeIterator = currentNodeIterator.goToNext();
+      currentNodeIterator = Parser.ignoreWhitespace(nodeList, currentNodeIterator, signature);
       nodeListEndHasBeenReached = !currentNodeIterator.isValid();
     }
   }
@@ -347,10 +351,11 @@ export class Parser
       iteratorAtCurrentNode = Parser.reduceSingleFunctionApplication(iteratorAtCurrentNode, signature, symbolTable, inputTokenString);
     }
     iteratorAtCurrentNode = topLevelNodeList.transferNodeToEnd(iteratorAtCurrentNode, argumentNodeList);
+    iteratorAtCurrentNode = Parser.ignoreWhitespace(topLevelNodeList, iteratorAtCurrentNode, signature);
 
     while(!Parser.functionArgumentHasFinished(iteratorAtCurrentNode))
     {
-      Parser.checkExpectedToken(iteratorAtCurrentNode, signature, ["TypedToken", "VariableToken", "VariableBindingToken", "LeftRoundBracketToken", "WhitespaceToken"]);
+      Parser.checkExpectedToken(iteratorAtCurrentNode, signature, ["TypedToken", "VariableToken", "VariableBindingToken", "LeftRoundBracketToken"]);
       
       if(Parser.iteratorIsAtFunctionApplicationStartingPoint(iteratorAtCurrentNode, symbolTable))
       {
@@ -358,9 +363,9 @@ export class Parser
       }
       
       iteratorAtCurrentNode = topLevelNodeList.transferNodeToEnd(iteratorAtCurrentNode, argumentNodeList);
+      iteratorAtCurrentNode = Parser.ignoreWhitespace(topLevelNodeList, iteratorAtCurrentNode, signature);
     }
 
-    Parser.removeArgumentNodeListTrailingWhitespace(argumentNodeList);
     const iteratorAtArgumentSeparator = iteratorAtCurrentNode;
     return [iteratorAtArgumentSeparator, argumentNodeList];
   }
@@ -517,7 +522,7 @@ export class Parser
       const {arity, operatorPosition}  = operatorRecord!;
       const numberOfExpectedOperandsBeforeOperator = operatorPosition;
       const numberOfExpectedOperandsAfterOperator = arity - operatorPosition;
-      
+
     }
   }
   

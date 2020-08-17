@@ -31,7 +31,7 @@ symbolTable.addOperatorSymbol(":", 2, 1, 30, OperatorAssociativity.Left);
 symbolTable.addOperatorSymbol("+", 2, 1, 40, OperatorAssociativity.Right);
 symbolTable.addOperatorSymbol("-", 2, 1, 50, OperatorAssociativity.Left);
 
-Parser.parse("f(1 )", lexer, signature, symbolTable);
+Parser.parse("f(0 + 1, f(1 + 1, f(0)) + 1)(1 + 1)(0 + 0) + 1", lexer, signature, symbolTable);
 
 describe("private convertTokenStringToNodeListAndHandleBrackets()", () =>
 {
@@ -281,28 +281,10 @@ describe("private proccessFunctionApplicatons()", () =>
               }
             ]
           ]
-        },
-        {
-          "substring": " ",
-          "substringBeginOffset": 6,
-          "substringEndOffset": 6,
-          "children": []
         }
       ]);
   
       expect(processString("  f(  1  )  ", lexer, signature, symbolTable)[0].toArray().map(element => element["reducedNodeObject"]())).toStrictEqual([
-        {
-          "substring": " ",
-          "substringBeginOffset": 0,
-          "substringEndOffset": 0,
-          "children": []
-        },
-        {
-          "substring": " ",
-          "substringBeginOffset": 1,
-          "substringEndOffset": 1,
-          "children": []
-        },
         {
           "substring": "f(  1  )",
           "substringBeginOffset": 2,
@@ -325,18 +307,6 @@ describe("private proccessFunctionApplicatons()", () =>
               }
             ]
           ]
-        },
-        {
-          "substring": " ",
-          "substringBeginOffset": 10,
-          "substringEndOffset": 10,
-          "children": []
-        },
-        {
-          "substring": " ",
-          "substringBeginOffset": 11,
-          "substringEndOffset": 11,
-          "children": []
         }
       ]);
     });
@@ -486,21 +456,9 @@ describe("private proccessFunctionApplicatons()", () =>
                 "children": []
               },
               {
-                "substring": " ",
-                "substringBeginOffset": 3,
-                "substringEndOffset": 3,
-                "children": []
-              },
-              {
                 "substring": "+",
                 "substringBeginOffset": 4,
                 "substringEndOffset": 4,
-                "children": []
-              },
-              {
-                "substring": " ",
-                "substringBeginOffset": 5,
-                "substringEndOffset": 5,
                 "children": []
               },
               {
@@ -536,21 +494,9 @@ describe("private proccessFunctionApplicatons()", () =>
                 "children": []
               },
               {
-                "substring": " ",
-                "substringBeginOffset": 3,
-                "substringEndOffset": 3,
-                "children": []
-              },
-              {
                 "substring": "+",
                 "substringBeginOffset": 4,
                 "substringEndOffset": 4,
-                "children": []
-              },
-              {
-                "substring": " ",
-                "substringBeginOffset": 5,
-                "substringEndOffset": 5,
                 "children": []
               },
               {
@@ -560,21 +506,9 @@ describe("private proccessFunctionApplicatons()", () =>
                 "children": []
               },
               {
-                "substring": " ",
-                "substringBeginOffset": 7,
-                "substringEndOffset": 7,
-                "children": []
-              },
-              {
                 "substring": "+",
                 "substringBeginOffset": 8,
                 "substringEndOffset": 8,
-                "children": []
-              },
-              {
-                "substring": " ",
-                "substringBeginOffset": 9,
-                "substringEndOffset": 9,
                 "children": []
               },
               {
@@ -584,21 +518,9 @@ describe("private proccessFunctionApplicatons()", () =>
                 "children": []
               },
               {
-                "substring": " ",
-                "substringBeginOffset": 11,
-                "substringEndOffset": 11,
-                "children": []
-              },
-              {
                 "substring": "+",
                 "substringBeginOffset": 12,
                 "substringEndOffset": 12,
-                "children": []
-              },
-              {
-                "substring": " ",
-                "substringBeginOffset": 13,
-                "substringEndOffset": 13,
                 "children": []
               },
               {
@@ -608,21 +530,9 @@ describe("private proccessFunctionApplicatons()", () =>
                 "children": []
               },
               {
-                "substring": " ",
-                "substringBeginOffset": 15,
-                "substringEndOffset": 15,
-                "children": []
-              },
-              {
                 "substring": "+",
                 "substringBeginOffset": 16,
                 "substringEndOffset": 16,
-                "children": []
-              },
-              {
-                "substring": " ",
-                "substringBeginOffset": 17,
-                "substringEndOffset": 17,
                 "children": []
               },
               {
@@ -640,21 +550,9 @@ describe("private proccessFunctionApplicatons()", () =>
                 "children": []
               },
               {
-                "substring": " ",
-                "substringBeginOffset": 22,
-                "substringEndOffset": 22,
-                "children": []
-              },
-              {
                 "substring": "+",
                 "substringBeginOffset": 23,
                 "substringEndOffset": 23,
-                "children": []
-              },
-              {
-                "substring": " ",
-                "substringBeginOffset": 24,
-                "substringEndOffset": 24,
                 "children": []
               },
               {
@@ -672,21 +570,9 @@ describe("private proccessFunctionApplicatons()", () =>
                 "children": []
               },
               {
-                "substring": " ",
-                "substringBeginOffset": 29,
-                "substringEndOffset": 29,
-                "children": []
-              },
-              {
                 "substring": "+",
                 "substringBeginOffset": 30,
                 "substringEndOffset": 30,
-                "children": []
-              },
-              {
-                "substring": " ",
-                "substringBeginOffset": 31,
-                "substringEndOffset": 31,
                 "children": []
               },
               {
@@ -725,21 +611,9 @@ describe("private proccessFunctionApplicatons()", () =>
                 "children": []
               },
               {
-                "substring": " ",
-                "substringBeginOffset": 3,
-                "substringEndOffset": 3,
-                "children": []
-              },
-              {
                 "substring": "+",
                 "substringBeginOffset": 4,
                 "substringEndOffset": 4,
-                "children": []
-              },
-              {
-                "substring": " ",
-                "substringBeginOffset": 5,
-                "substringEndOffset": 5,
                 "children": []
               },
               {
@@ -772,21 +646,9 @@ describe("private proccessFunctionApplicatons()", () =>
                 "children": []
               },
               {
-                "substring": " ",
-                "substringBeginOffset": 11,
-                "substringEndOffset": 11,
-                "children": []
-              },
-              {
                 "substring": "+",
                 "substringBeginOffset": 12,
                 "substringEndOffset": 12,
-                "children": []
-              },
-              {
-                "substring": " ",
-                "substringBeginOffset": 13,
-                "substringEndOffset": 13,
                 "children": []
               },
               {
@@ -822,21 +684,9 @@ describe("private proccessFunctionApplicatons()", () =>
                 "children": []
               },
               {
-                "substring": " ",
-                "substringBeginOffset": 3,
-                "substringEndOffset": 3,
-                "children": []
-              },
-              {
                 "substring": "+",
                 "substringBeginOffset": 4,
                 "substringEndOffset": 4,
-                "children": []
-              },
-              {
-                "substring": " ",
-                "substringBeginOffset": 5,
-                "substringEndOffset": 5,
                 "children": []
               },
               {
@@ -849,21 +699,9 @@ describe("private proccessFunctionApplicatons()", () =>
           ]
         },
         {
-          "substring": " ",
-          "substringBeginOffset": 8,
-          "substringEndOffset": 8,
-          "children": []
-        },
-        {
           "substring": "+",
           "substringBeginOffset": 9,
           "substringEndOffset": 9,
-          "children": []
-        },
-        {
-          "substring": " ",
-          "substringBeginOffset": 10,
-          "substringEndOffset": 10,
           "children": []
         },
         {
@@ -887,21 +725,9 @@ describe("private proccessFunctionApplicatons()", () =>
                 "children": []
               },
               {
-                "substring": " ",
-                "substringBeginOffset": 14,
-                "substringEndOffset": 14,
-                "children": []
-              },
-              {
                 "substring": "+",
                 "substringBeginOffset": 15,
                 "substringEndOffset": 15,
-                "children": []
-              },
-              {
-                "substring": " ",
-                "substringBeginOffset": 16,
-                "substringEndOffset": 16,
                 "children": []
               },
               {
@@ -1007,21 +833,9 @@ describe("private proccessFunctionApplicatons()", () =>
                 "children": []
               },
               {
-                "substring": " ",
-                "substringBeginOffset": 6,
-                "substringEndOffset": 6,
-                "children": []
-              },
-              {
                 "substring": "+",
                 "substringBeginOffset": 7,
                 "substringEndOffset": 7,
-                "children": []
-              },
-              {
-                "substring": " ",
-                "substringBeginOffset": 8,
-                "substringEndOffset": 8,
                 "children": []
               },
               {
@@ -1056,21 +870,9 @@ describe("private proccessFunctionApplicatons()", () =>
                 ]
               },
               {
-                "substring": " ",
-                "substringBeginOffset": 16,
-                "substringEndOffset": 16,
-                "children": []
-              },
-              {
                 "substring": "+",
                 "substringBeginOffset": 17,
                 "substringEndOffset": 17,
-                "children": []
-              },
-              {
-                "substring": " ",
-                "substringBeginOffset": 18,
-                "substringEndOffset": 18,
                 "children": []
               },
               {
@@ -1269,21 +1071,9 @@ describe("private proccessFunctionApplicatons()", () =>
                       "children": []
                     },
                     {
-                      "substring": " ",
-                      "substringBeginOffset": 3,
-                      "substringEndOffset": 3,
-                      "children": []
-                    },
-                    {
                       "substring": "+",
                       "substringBeginOffset": 4,
                       "substringEndOffset": 4,
-                      "children": []
-                    },
-                    {
-                      "substring": " ",
-                      "substringBeginOffset": 5,
-                      "substringEndOffset": 5,
                       "children": []
                     },
                     {
@@ -1343,27 +1133,9 @@ describe("private proccessFunctionApplicatons()", () =>
                       ]
                     },
                     {
-                      "substring": " ",
-                      "substringBeginOffset": 19,
-                      "substringEndOffset": 19,
-                      "children": []
-                    },
-                    {
-                      "substring": " ",
-                      "substringBeginOffset": 20,
-                      "substringEndOffset": 20,
-                      "children": []
-                    },
-                    {
                       "substring": "+",
                       "substringBeginOffset": 21,
                       "substringEndOffset": 21,
-                      "children": []
-                    },
-                    {
-                      "substring": " ",
-                      "substringBeginOffset": 22,
-                      "substringEndOffset": 22,
                       "children": []
                     },
                     {
@@ -1405,21 +1177,9 @@ describe("private proccessFunctionApplicatons()", () =>
           "children": []
         },
         {
-          "substring": " ",
-          "substringBeginOffset": 2,
-          "substringEndOffset": 2,
-          "children": []
-        },
-        {
           "substring": "f",
           "substringBeginOffset": 3,
           "substringEndOffset": 3,
-          "children": []
-        },
-        {
-          "substring": " ",
-          "substringBeginOffset": 4,
-          "substringEndOffset": 4,
           "children": []
         },
         {
@@ -1435,21 +1195,9 @@ describe("private proccessFunctionApplicatons()", () =>
           "children": []
         },
         {
-          "substring": " ",
-          "substringBeginOffset": 7,
-          "substringEndOffset": 7,
-          "children": []
-        },
-        {
           "substring": "+",
           "substringBeginOffset": 8,
           "substringEndOffset": 8,
-          "children": []
-        },
-        {
-          "substring": " ",
-          "substringBeginOffset": 9,
-          "substringEndOffset": 9,
           "children": []
         },
         {
@@ -1497,12 +1245,6 @@ describe("private proccessFunctionApplicatons()", () =>
           ]
         },
         {
-          "substring": " ",
-          "substringBeginOffset": 4,
-          "substringEndOffset": 4,
-          "children": []
-        },
-        {
           "substring": "(",
           "substringBeginOffset": 5,
           "substringEndOffset": 5,
@@ -1518,12 +1260,6 @@ describe("private proccessFunctionApplicatons()", () =>
           "substring": ")",
           "substringBeginOffset": 7,
           "substringEndOffset": 7,
-          "children": []
-        },
-        {
-          "substring": " ",
-          "substringBeginOffset": 8,
-          "substringEndOffset": 8,
           "children": []
         },
         {
@@ -1554,219 +1290,147 @@ describe("private proccessFunctionApplicatons()", () =>
       iteratorsQueue.forEach(iter => iter.getList().remove(iter));
       expect(nodeList.toArray().map(node => node["reducedNodeObject"]())).toStrictEqual([
         {
+          "substring": "f(0 + 1, f(1 + 1, f(0)) + 1)(1 + 1)(0 + 0)",
+          "substringBeginOffset": 0,
+          "substringEndOffset": 41,
           "children": [
             [
               {
+                "substring": "f(0 + 1, f(1 + 1, f(0)) + 1)(1 + 1)",
+                "substringBeginOffset": 0,
+                "substringEndOffset": 34,
                 "children": [
                   [
                     {
+                      "substring": "f(0 + 1, f(1 + 1, f(0)) + 1)",
+                      "substringBeginOffset": 0,
+                      "substringEndOffset": 27,
                       "children": [
                         [
                           {
-                            "children": [],
                             "substring": "f",
                             "substringBeginOffset": 0,
-                            "substringEndOffset": 0
+                            "substringEndOffset": 0,
+                            "children": []
                           }
                         ],
                         [
                           {
-                            "children": [],
                             "substring": "0",
                             "substringBeginOffset": 2,
-                            "substringEndOffset": 2
+                            "substringEndOffset": 2,
+                            "children": []
                           },
                           {
-                            "children": [],
-                            "substring": " ",
-                            "substringBeginOffset": 3,
-                            "substringEndOffset": 3
-                          },
-                          {
-                            "children": [],
-                            "substring": " ",
-                            "substringBeginOffset": 5,
-                            "substringEndOffset": 5
-                          },
-                          {
-                            "children": [],
                             "substring": "1",
                             "substringBeginOffset": 6,
-                            "substringEndOffset": 6
+                            "substringEndOffset": 6,
+                            "children": []
                           }
                         ],
                         [
                           {
+                            "substring": "f(1 + 1, f(0))",
+                            "substringBeginOffset": 9,
+                            "substringEndOffset": 22,
                             "children": [
                               [
                                 {
-                                  "children": [],
                                   "substring": "f",
                                   "substringBeginOffset": 9,
-                                  "substringEndOffset": 9
+                                  "substringEndOffset": 9,
+                                  "children": []
                                 }
                               ],
                               [
                                 {
-                                  "children": [],
                                   "substring": "1",
                                   "substringBeginOffset": 11,
-                                  "substringEndOffset": 11
+                                  "substringEndOffset": 11,
+                                  "children": []
                                 },
                                 {
-                                  "children": [],
-                                  "substring": " ",
-                                  "substringBeginOffset": 12,
-                                  "substringEndOffset": 12
-                                },
-                                {
-                                  "children": [],
-                                  "substring": " ",
-                                  "substringBeginOffset": 14,
-                                  "substringEndOffset": 14
-                                },
-                                {
-                                  "children": [],
                                   "substring": "1",
                                   "substringBeginOffset": 15,
-                                  "substringEndOffset": 15
+                                  "substringEndOffset": 15,
+                                  "children": []
                                 }
                               ],
                               [
                                 {
+                                  "substring": "f(0)",
+                                  "substringBeginOffset": 18,
+                                  "substringEndOffset": 21,
                                   "children": [
                                     [
                                       {
-                                        "children": [],
                                         "substring": "f",
                                         "substringBeginOffset": 18,
-                                        "substringEndOffset": 18
+                                        "substringEndOffset": 18,
+                                        "children": []
                                       }
                                     ],
                                     [
                                       {
-                                        "children": [],
                                         "substring": "0",
                                         "substringBeginOffset": 20,
-                                        "substringEndOffset": 20
+                                        "substringEndOffset": 20,
+                                        "children": []
                                       }
                                     ]
-                                  ],
-                                  "substring": "f(0)",
-                                  "substringBeginOffset": 18,
-                                  "substringEndOffset": 21
+                                  ]
                                 }
                               ]
-                            ],
-                            "substring": "f(1 + 1, f(0))",
-                            "substringBeginOffset": 9,
-                            "substringEndOffset": 22
+                            ]
                           },
                           {
-                            "children": [],
-                            "substring": " ",
-                            "substringBeginOffset": 23,
-                            "substringEndOffset": 23
-                          },
-                          {
-                            "children": [],
-                            "substring": " ",
-                            "substringBeginOffset": 25,
-                            "substringEndOffset": 25
-                          },
-                          {
-                            "children": [],
                             "substring": "1",
                             "substringBeginOffset": 26,
-                            "substringEndOffset": 26
+                            "substringEndOffset": 26,
+                            "children": []
                           }
                         ]
-                      ],
-                      "substring": "f(0 + 1, f(1 + 1, f(0)) + 1)",
-                      "substringBeginOffset": 0,
-                      "substringEndOffset": 27
+                      ]
                     }
                   ],
                   [
                     {
-                      "children": [],
                       "substring": "1",
                       "substringBeginOffset": 29,
-                      "substringEndOffset": 29
+                      "substringEndOffset": 29,
+                      "children": []
                     },
                     {
-                      "children": [],
-                      "substring": " ",
-                      "substringBeginOffset": 30,
-                      "substringEndOffset": 30
-                    },
-                    {
-                      "children": [],
-                      "substring": " ",
-                      "substringBeginOffset": 32,
-                      "substringEndOffset": 32
-                    },
-                    {
-                      "children": [],
                       "substring": "1",
                       "substringBeginOffset": 33,
-                      "substringEndOffset": 33
+                      "substringEndOffset": 33,
+                      "children": []
                     }
                   ]
-                ],
-                "substring": "f(0 + 1, f(1 + 1, f(0)) + 1)(1 + 1)",
-                "substringBeginOffset": 0,
-                "substringEndOffset": 34
+                ]
               }
             ],
             [
               {
-                "children": [],
                 "substring": "0",
                 "substringBeginOffset": 36,
-                "substringEndOffset": 36
+                "substringEndOffset": 36,
+                "children": []
               },
               {
-                "children": [],
-                "substring": " ",
-                "substringBeginOffset": 37,
-                "substringEndOffset": 37
-              },
-              {
-                "children": [],
-                "substring": " ",
-                "substringBeginOffset": 39,
-                "substringEndOffset": 39
-              },
-              {
-                "children": [],
                 "substring": "0",
                 "substringBeginOffset": 40,
-                "substringEndOffset": 40
+                "substringEndOffset": 40,
+                "children": []
               }
             ]
-          ],
-          "substring": "f(0 + 1, f(1 + 1, f(0)) + 1)(1 + 1)(0 + 0)",
-          "substringBeginOffset": 0,
-          "substringEndOffset": 41
+          ]
         },
         {
-          "children": [],
-          "substring": " ",
-          "substringBeginOffset": 42,
-          "substringEndOffset": 42
-        },
-        {
-          "children": [],
-          "substring": " ",
-          "substringBeginOffset": 44,
-          "substringEndOffset": 44
-        },
-        {
-          "children": [],
           "substring": "1",
           "substringBeginOffset": 45,
-          "substringEndOffset": 45
+          "substringEndOffset": 45,
+          "children": []
         }
       ]);
     });
