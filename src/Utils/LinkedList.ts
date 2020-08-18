@@ -813,6 +813,7 @@ export class LinkedList<T>
     transferedNode!.list = targetList; //Transfering node ownership to new list
     if(targetList.isEmpty())
     {
+      transferedNode!.next = null;
       targetList.head = transferedNode;
       targetList.last = transferedNode;
       targetList.length = 1;

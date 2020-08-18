@@ -25,9 +25,13 @@ export class Parser
 
     //4. Reduce Function Applications
     const reducedFunctionApplicationsAndBracketedExpressionsNodeList = Parser.reduceFunctionApplicationsAndBracketedExpressions(nodeList, signature, symbolTable, tokenString);
+    
+    //5. Reduce Operator Applications
+    Parser.reduceOperatorApplications(operatorsIteratorQueue, tokenString, signature, symbolTable);
+
     fs.writeFileSync("temp.json", JSON.stringify(reducedFunctionApplicationsAndBracketedExpressionsNodeList.toArray().map(element => element["reducedNodeObject"]()), null, 2));
 
-    //6. Reduce Operator Applications
+
   }
 
   /**
@@ -484,8 +488,8 @@ export class Parser
   {
     for(const iteratorAtOperator of operatorsIteratorQueue)
     {
-      const topLevelNodeList = iteratorAtOperator.getList();
-      const operatorIsOperand = topLevelNodeList.size() === 1;
+      const currentExpressionNodeList = iteratorAtOperator.getList();
+      const operatorIsOperand = currentExpressionNodeList.size() === 1;
       if(operatorIsOperand)
       {
         continue;
@@ -496,81 +500,76 @@ export class Parser
       const {arity, operatorPosition}  = operatorRecord!;
       const numberOfExpectedLeftOperands = operatorPosition;
       const numberOfExpectedRightOperands = arity - operatorPosition;
-      const operatorApplicationReducedNode = new ParseTreeNode(inputTokenString);
-      const operandsNodeListList = new LinkedList<LinkedList<ParseTreeNode>>(); //Constant Time Insertion
+      const reducedOperatorApplicationNode = new ParseTreeNode(inputTokenString);
+      const listWrappedOperandsList = new LinkedList<LinkedList<ParseTreeNode>>(); //Constant Time Insertion
 
       //Left Operands
-      for(let leftOperandCounter = 0, iteratorAtCurrentNode = iteratorAtOperator.clone(); 
+      for(let leftOperandCounter = 0, iteratorAtCurrentOperandNode = iteratorAtOperator.clone().goToPrevious(); 
         leftOperandCounter < numberOfExpectedLeftOperands; 
-        leftOperandCounter++)
+        leftOperandCounter++, iteratorAtCurrentOperandNode = iteratorAtOperator.clone().goToPrevious())
       {
-        const currentOperandNodeList = new LinkedList<ParseTreeNode>();
-        const currentNode = iteratorAtCurrentNode.get();
-        if(currentNode.isSingleToken())
+        const listWrappedCurrentOperand = new LinkedList<ParseTreeNode>();
+        const currentOperandNode = iteratorAtCurrentOperandNode.get();
+        if(currentOperandNode.isSingleToken())
         {
-          Parser.checkExpectedToken(iteratorAtCurrentNode, signature, ["TypedToken", "VariableToken", "VariableBindingToken", "RightRoundBracketToken"]);
-          const currentNodeSort = signature.getRecord(currentNode.getCorrespondingInputSubstring().toString()).sort();
+          Parser.checkExpectedToken(iteratorAtCurrentOperandNode, signature, ["TypedToken", "VariableToken", "VariableBindingToken", "RightRoundBracketToken"]);
+        }
 
-          if(currentNodeSort === "RightRoundBracket")
-          {
-            //Encapsulate Node
-          }
-          else
-          {
-            iteratorAtCurrentNode = topLevelNodeList.transferNodeToEnd(iteratorAtCurrentNode, currentOperandNodeList).goToPrevious();
-            operandsNodeListList.unshift(currentOperandNodeList);
-          }
-        }
-        else
-        {
-          //Is Compound Node
-          iteratorAtCurrentNode = topLevelNodeList.transferNodeToEnd(iteratorAtCurrentNode, currentOperandNodeList).goToPrevious();
-          operandsNodeListList.unshift(currentOperandNodeList);
-        }
+        currentExpressionNodeList.transferNodeToEnd(iteratorAtCurrentOperandNode, listWrappedCurrentOperand);
+        listWrappedOperandsList.unshift(listWrappedCurrentOperand);
       }
       
       //Right Operands
-      for(let rightOperandCounter = 0, iteratorAtCurrentNode = iteratorAtOperator.clone(); 
+      for(let rightOperandCounter = 0, iteratorAtCurrentOperandNode = iteratorAtOperator.clone().goToNext(); 
         rightOperandCounter < numberOfExpectedRightOperands; 
-        rightOperandCounter++)
+        rightOperandCounter++, iteratorAtCurrentOperandNode = iteratorAtOperator.clone().goToNext())
       {
-        const currentOperandNodeList = new LinkedList<ParseTreeNode>();
-        const currentNode = iteratorAtCurrentNode.get();
+        const listWrappedCurrentOperand = new LinkedList<ParseTreeNode>();
+        const currentNode = iteratorAtCurrentOperandNode.get();
         if(currentNode.isSingleToken())
         {
-          Parser.checkExpectedToken(iteratorAtCurrentNode, signature, ["TypedToken", "VariableToken", "VariableBindingToken", "LeftRoundBracketToken"]);
-          const currentNodeSort = signature.getRecord(currentNode.getCorrespondingInputSubstring().toString()).sort();
+          Parser.checkExpectedToken(iteratorAtCurrentOperandNode, signature, ["TypedToken", "VariableToken", "VariableBindingToken", "LeftRoundBracketToken"]);
+        }
 
-          if(currentNodeSort === "LeftRoundBracket")
-          {
-            //Encapsulate Node
-          }
-          else
-          {
-            iteratorAtCurrentNode = topLevelNodeList.transferNodeToEnd(iteratorAtCurrentNode, currentOperandNodeList);
-            operandsNodeListList.unshift(currentOperandNodeList);
-          }
-        }
-        else
-        {
-          //Is Compound Node
-          iteratorAtCurrentNode = topLevelNodeList.transferNodeToEnd(iteratorAtCurrentNode, currentOperandNodeList);
-          operandsNodeListList.unshift(currentOperandNodeList);
-        }
+        currentExpressionNodeList.transferNodeToEnd(iteratorAtCurrentOperandNode, listWrappedCurrentOperand);
+        listWrappedOperandsList.push(listWrappedCurrentOperand);
       }
 
       //Inserting Operator Application Reduced Node
-      topLevelNodeList.insertBefore(iteratorAtOperator, operatorApplicationReducedNode);
+      currentExpressionNodeList.insertBefore(iteratorAtOperator, reducedOperatorApplicationNode);
 
       //Setting Operator Application Reduced Node Children (operator and operands)
       const listWrappedOperatorNode = new LinkedList<ParseTreeNode>();
-      topLevelNodeList.transferNodeToEnd(iteratorAtOperator, listWrappedOperatorNode);
+      currentExpressionNodeList.transferNodeToBegin(iteratorAtOperator, listWrappedOperatorNode);
 
-      const operatorApplicationReducedNodeChildrenAsList = operandsNodeListList;
-      operatorApplicationReducedNodeChildrenAsList.unshift(listWrappedOperatorNode);
-      operatorApplicationReducedNode.children = operatorApplicationReducedNodeChildrenAsList.toArray();
+      const reducedOperatorApplicationNodeChildrenAsList = listWrappedOperandsList;
+      reducedOperatorApplicationNodeChildrenAsList.unshift(listWrappedOperatorNode);
+
+      reducedOperatorApplicationNode.children = reducedOperatorApplicationNodeChildrenAsList.toArray(); //Recovering array from linked list
 
       //Remove Excess Brackets
+
+      //Setting Offsets
+      const operatorIsPrefix = operatorPosition === 0;
+      const operatorIsSuffix = operatorPosition === arity;
+      const operatorNode = reducedOperatorApplicationNode.children[0].atHead();
+      const firstOperandNode = reducedOperatorApplicationNode.children[1].atHead();
+      const lastOperandNode = reducedOperatorApplicationNode.children[reducedOperatorApplicationNode.children.length - 1].atLast();
+      if(operatorIsPrefix)
+      {
+        reducedOperatorApplicationNode.substringBeginOffset = operatorNode.substringBeginOffset;
+        reducedOperatorApplicationNode.substringEndOffset = lastOperandNode.substringEndOffset;
+      }
+      else if(operatorIsSuffix)
+      {
+        reducedOperatorApplicationNode.substringBeginOffset = firstOperandNode.substringBeginOffset;
+        reducedOperatorApplicationNode.substringEndOffset = operatorNode.substringEndOffset;
+      }
+      else
+      {
+        reducedOperatorApplicationNode.substringBeginOffset = firstOperandNode.substringBeginOffset;
+        reducedOperatorApplicationNode.substringEndOffset = lastOperandNode.substringEndOffset;
+      }
     }
   }
 
