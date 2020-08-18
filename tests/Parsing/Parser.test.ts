@@ -29,7 +29,7 @@ symbolTable.addOperatorSymbol(":", 2, 1, 30, OperatorAssociativity.Left);
 symbolTable.addOperatorSymbol("+", 2, 1, 40, OperatorAssociativity.Right);
 symbolTable.addOperatorSymbol("-", 2, 1, 50, OperatorAssociativity.Left);
 
-Parser.parse("0 * (1 + 1)", lexer, signature, symbolTable);
+Parser.parse("0 * ((1) + (1))", lexer, signature, symbolTable);
 
 describe("private convertTokenStringToNodeListAndHandleBrackets()", () =>
 {

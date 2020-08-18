@@ -577,10 +577,10 @@ export class Parser
 
 
     //Remove Proxy Nodes
-    for(const topLevelNode of outputNodeList)
-    {
-      Parser.removeParseTreeProxyNodes(topLevelNode);
-    }
+    // for(const topLevelNode of outputNodeList)
+    // {
+    //   Parser.removeParseTreeProxyNodes(topLevelNode);
+    // }
 
     return outputNodeList;
   }

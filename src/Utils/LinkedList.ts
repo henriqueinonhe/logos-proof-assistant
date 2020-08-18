@@ -28,33 +28,32 @@ export class LinkedListNode<T>
     this.next = next;
   }
 
-  /**
-   * Checks whether this node is head on the list.
-   * Const.
-   * 
-   * Pre Conditions:
-   * None
-   * 
-   */
-  public isHead() : boolean
+  public isValid() : boolean
   {
-    return this.previous === null;
+    return this.list !== null;
   }
 
-  /**
-   * Checks whether this node is last on the list.
-   * Const.
-   * 
-   * Pre Conditions:
-   * None
-   * 
-   */
   public isLast() : boolean
   {
+    this.checkValidity();
     return this.next === null;
   }
 
-  public list : LinkedList<T>;
+  public isHead() : boolean
+  {
+    this.checkValidity();
+    return this.previous === null;
+  }
+
+  private checkValidity() : void
+  {
+    if(!this.isValid())
+    {
+      throw new LogicErrorException("Node is not valid!");
+    }
+  }
+
+  public list : LinkedList<T> | null;
   public data : T;
   public previous : LinkedListNode<T> | null;
   public next : LinkedListNode<T> | null;
@@ -164,7 +163,7 @@ export class LinkedListIterator<T>
    */
   public clone() : LinkedListIterator<T>
   {
-    const clone = new LinkedListIterator<T>(this.getList() as LinkedList<T>);
+    const clone = new LinkedListIterator<T>(null);
     clone.node = this.node;
 
     return clone;
@@ -181,7 +180,7 @@ export class LinkedListIterator<T>
    */
   public isValid() : boolean
   {
-    return this.node !== null;
+    return this.node !== null && this.node.isValid();
   }
 
   private checkValidity() : void
@@ -202,7 +201,7 @@ export class LinkedListIterator<T>
    */
   public isAtHead() : boolean
   {
-    return this.isValid() && this.node!.isHead();
+    return this.isValid() && this.node!.previous === null;
   }
 
   /**
@@ -216,7 +215,7 @@ export class LinkedListIterator<T>
    */
   public isAtLast() : boolean
   {
-    return this.isValid() && this.node!.isLast();
+    return this.isValid() && this.node!.next === null;
   }
 
   /**
@@ -229,7 +228,7 @@ export class LinkedListIterator<T>
   {
     this.checkValidity();
 
-    return this.node!.list;
+    return this.node!.list as LinkedList<T>;
   }
 
   private node : LinkedListNode<T> | null;
@@ -278,10 +277,12 @@ export class LinkedList<T>
   {
     this.checkIteratorValidity(iterator);
 
-    const currentNode = iterator["node"]; //Friendship access
-    const afterInsertedNode = currentNode!.next;
-    const insertedNode = new LinkedListNode<T>(this, data, currentNode, afterInsertedNode);
-    if(currentNode!.isLast())
+    const beforeInsertedNode = iterator["node"]; //Friendship access
+    const afterInsertedNode = iterator["node"]!.next;
+    const insertedNode = new LinkedListNode<T>(this, data, beforeInsertedNode, afterInsertedNode);
+
+    
+    if(beforeInsertedNode!.isLast())
     {
       this.last = insertedNode;
     }
@@ -289,8 +290,8 @@ export class LinkedList<T>
     {
       afterInsertedNode!.previous = insertedNode;
     }
-    currentNode!.next = insertedNode;
-
+    
+    beforeInsertedNode!.next = insertedNode;
     this.length++;
 
     const returnIterator = iterator.clone();
@@ -349,36 +350,37 @@ export class LinkedList<T>
   {
     this.checkIteratorValidity(iterator);
 
-    const currentNode = iterator["node"]; //Friendship access
-    const previousNode = currentNode!.previous;
-    const nextNode = currentNode!.next;
+    const removedNode = iterator["node"]; //Friendship access
+    const beforeRemovedNode = removedNode!.previous;
+    const afterRemovedNode = removedNode!.next;
 
     //List Nodes
-    if(currentNode!.isHead())
+    if(removedNode!.isHead())
     {
-      this.head = nextNode;
+      this.head = afterRemovedNode;
     }
     else
     {
-      previousNode!.next = nextNode;
+      beforeRemovedNode!.next = afterRemovedNode;
     }
 
-    if(currentNode!.isLast())
+    if(removedNode!.isLast())
     {
-      this.last = previousNode;
+      this.last = beforeRemovedNode;
     }
     else
     {
-      nextNode!.previous = previousNode;
+      afterRemovedNode!.previous = beforeRemovedNode;
     }
 
     this.length--;
 
-    currentNode!.next = null;
-    currentNode!.previous = null;
+    removedNode!.next = null;
+    removedNode!.previous = null;
+    removedNode!.list = null;
 
     const returnIterator = iterator.clone();
-    returnIterator["node"] = nextNode;
+    returnIterator["node"] = afterRemovedNode;
     return returnIterator;
   }
 
@@ -711,7 +713,9 @@ export class LinkedList<T>
     const transferedNode = sourceListIterator["node"];
     transferedNode!.list = targetList; //Transfering node ownership to new list
     const beforeInsertedNode = targetListIterator["node"]; //Friendship access
-    const afterInsertedNode = beforeInsertedNode!.next;
+    const afterInsertedNode = targetListIterator["node"]!.next; //Friendship access
+
+    
     if(beforeInsertedNode!.isLast())
     {
       targetList.last = transferedNode;
@@ -720,10 +724,11 @@ export class LinkedList<T>
     {
       afterInsertedNode!.previous = transferedNode;
     }
+
     beforeInsertedNode!.next = transferedNode;
     transferedNode!.previous = beforeInsertedNode;
     transferedNode!.next = afterInsertedNode;
-
+    
     targetList.length++;
     return returnedIterator;
   }
