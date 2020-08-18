@@ -353,6 +353,7 @@ export class LinkedList<T>
     const previousNode = currentNode!.previous;
     const nextNode = currentNode!.next;
 
+    //List Nodes
     if(currentNode!.isHead())
     {
       this.head = nextNode;
@@ -372,6 +373,9 @@ export class LinkedList<T>
     }
 
     this.length--;
+
+    currentNode!.next = null;
+    currentNode!.previous = null;
 
     const returnIterator = iterator.clone();
     returnIterator["node"] = nextNode;

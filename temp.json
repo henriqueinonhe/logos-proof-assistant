@@ -1,6 +1,6 @@
 [
   {
-    "substring": "1 * (1 + 1)",
+    "substring": "0 * (1 + 1)",
     "substringBeginOffset": 0,
     "substringEndOffset": 10,
     "children": [
@@ -14,7 +14,7 @@
       ],
       [
         {
-          "substring": "1",
+          "substring": "0",
           "substringBeginOffset": 0,
           "substringEndOffset": 0,
           "children": []
@@ -22,41 +22,32 @@
       ],
       [
         {
-          "substring": "(1 + 1)",
-          "substringBeginOffset": 4,
-          "substringEndOffset": 10,
+          "substring": "1 + 1",
+          "substringBeginOffset": 5,
+          "substringEndOffset": 9,
           "children": [
             [
               {
-                "substring": "1 + 1",
+                "substring": "+",
+                "substringBeginOffset": 7,
+                "substringEndOffset": 7,
+                "children": []
+              }
+            ],
+            [
+              {
+                "substring": "1",
                 "substringBeginOffset": 5,
+                "substringEndOffset": 5,
+                "children": []
+              }
+            ],
+            [
+              {
+                "substring": "1",
+                "substringBeginOffset": 9,
                 "substringEndOffset": 9,
-                "children": [
-                  [
-                    {
-                      "substring": "+",
-                      "substringBeginOffset": 7,
-                      "substringEndOffset": 7,
-                      "children": []
-                    }
-                  ],
-                  [
-                    {
-                      "substring": "1",
-                      "substringBeginOffset": 5,
-                      "substringEndOffset": 5,
-                      "children": []
-                    }
-                  ],
-                  [
-                    {
-                      "substring": "1",
-                      "substringBeginOffset": 9,
-                      "substringEndOffset": 9,
-                      "children": []
-                    }
-                  ]
-                ]
+                "children": []
               }
             ]
           ]

@@ -27,9 +27,9 @@ export class Parser
     const reducedFunctionApplicationsAndBracketedExpressionsNodeList = Parser.reduceFunctionApplicationsAndBracketedExpressions(nodeList, signature, symbolTable, tokenString);
     
     //5. Reduce Operator Applications
-    Parser.reduceOperatorApplications(operatorsIteratorQueue, tokenString, signature, symbolTable);
+    const reducedOperatorApplicationsNodeList = Parser.reduceOperatorApplications(operatorsIteratorQueue, reducedFunctionApplicationsAndBracketedExpressionsNodeList, tokenString, signature, symbolTable);
 
-    fs.writeFileSync("temp.json", JSON.stringify(reducedFunctionApplicationsAndBracketedExpressionsNodeList.toArray().map(element => element["reducedNodeObject"]()), null, 2));
+    fs.writeFileSync("temp.json", JSON.stringify(reducedOperatorApplicationsNodeList.toArray().map(element => element["reducedNodeObject"]()), null, 2));
 
 
   }
@@ -232,10 +232,16 @@ export class Parser
     
     let iteratorAtCurrentArgumentListOpeningBracket = iteratorAtFirstArgumentListOpeningBracket;
     let iteratorAtCurrentArgumentListClosingBracket;
+    let iteratorAtAfterCurrentArgumentListClosingBracket : LinkedListIterator<ParseTreeNode>;
     let isFirstArgumentList = true;
     //First Argument List Is Presence Mandatory
     do
     {
+      if(!isFirstArgumentList)
+      {
+        iteratorAtCurrentArgumentListOpeningBracket = iteratorAtAfterCurrentArgumentListClosingBracket!;
+      }
+
       const parseFunctionArgumentListReturnValues = Parser.parseFunctionArgumentList(iteratorAtCurrentArgumentListOpeningBracket, inputNodeList, signature, symbolTable, inputTokenString);
 
       [iteratorAtCurrentArgumentListClosingBracket] = parseFunctionArgumentListReturnValues;
@@ -268,14 +274,14 @@ export class Parser
       topLevelFunctionApplicationReducedNode.substringEndOffset = iteratorAtCurrentArgumentListClosingBracket.get().substringEndOffset;
 
       //Remove Closing Bracket
-      iteratorAtCurrentArgumentListOpeningBracket = inputNodeList.remove(iteratorAtCurrentArgumentListClosingBracket);
+      iteratorAtAfterCurrentArgumentListClosingBracket = inputNodeList.remove(iteratorAtCurrentArgumentListClosingBracket);
 
-    } while(Parser.hasNextArgumentList(iteratorAtCurrentArgumentListClosingBracket));
+    } while(Parser.hasNextArgumentList(iteratorAtAfterCurrentArgumentListClosingBracket));
     
     //Push Top Level Reduced Node To Output Node List
     outputNodeList.push(topLevelFunctionApplicationReducedNode); //Isso aqui vai dar bode
 
-    const iteratorAtAfterFunctionApplication = iteratorAtCurrentArgumentListOpeningBracket;
+    const iteratorAtAfterFunctionApplication = iteratorAtAfterCurrentArgumentListClosingBracket;
 
     return iteratorAtAfterFunctionApplication;
   }
@@ -361,9 +367,8 @@ export class Parser
     return iteratorAtPossibleComma.isValid() && iteratorAtPossibleComma.get().getCorrespondingInputSubstring().toString() === ",";
   }
 
-  private static hasNextArgumentList(iteratorAtPreviousArgumentListEnd : LinkedListIterator<ParseTreeNode>) : boolean
+  private static hasNextArgumentList(iteratorAtPossibleArgumentListBegin : LinkedListIterator<ParseTreeNode>) : boolean
   {
-    const iteratorAtPossibleArgumentListBegin = iteratorAtPreviousArgumentListEnd.clone().goToNext();
     return iteratorAtPossibleArgumentListBegin.isValid() && iteratorAtPossibleArgumentListBegin.get().getCorrespondingInputSubstring().toString() === "(";
   }
 
@@ -484,7 +489,7 @@ export class Parser
   }
 
 
-  private static reduceOperatorApplications(operatorsIteratorQueue : Array<LinkedListIterator<ParseTreeNode>>, inputTokenString : TokenString, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable) : void
+  private static reduceOperatorApplications(operatorsIteratorQueue : Array<LinkedListIterator<ParseTreeNode>>, outputNodeList : LinkedList<ParseTreeNode>, inputTokenString : TokenString, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable) : LinkedList<ParseTreeNode>
   {
     for(const iteratorAtOperator of operatorsIteratorQueue)
     {
@@ -547,8 +552,6 @@ export class Parser
 
       reducedOperatorApplicationNode.children = reducedOperatorApplicationNodeChildrenAsList.toArray(); //Recovering array from linked list
 
-      //Remove Excess Brackets
-
       //Setting Offsets
       const operatorIsPrefix = operatorPosition === 0;
       const operatorIsSuffix = operatorPosition === arity;
@@ -569,6 +572,36 @@ export class Parser
       {
         reducedOperatorApplicationNode.substringBeginOffset = firstOperandNode.substringBeginOffset;
         reducedOperatorApplicationNode.substringEndOffset = lastOperandNode.substringEndOffset;
+      }
+    }
+
+
+    //Remove Proxy Nodes
+    for(const topLevelNode of outputNodeList)
+    {
+      Parser.removeParseTreeProxyNodes(topLevelNode);
+    }
+
+    return outputNodeList;
+  }
+
+  private static removeParseTreeProxyNodes(parentNode : ParseTreeNode) : void
+  {
+    for(const childNodeList of parentNode.children)
+    {
+      let nodeIndex = 0;
+      for(const node of childNodeList)
+      {
+        if(node.children.length === 1)
+        {
+          const nodeToBeElevated = node.children[0].atHead(); 
+          const iteratorAtNodeToBeRemoved = childNodeList.iteratorAt(nodeIndex); //This might hurt perfomance, therefore if this causes the algorithm to reach a higher than linear complexity, then we need to pre process the tree to allow constant time random access
+          childNodeList.insertAfter(iteratorAtNodeToBeRemoved, nodeToBeElevated);
+          childNodeList.remove(iteratorAtNodeToBeRemoved);
+        }
+
+        Parser.removeParseTreeProxyNodes(node);
+        nodeIndex++;
       }
     }
   }
