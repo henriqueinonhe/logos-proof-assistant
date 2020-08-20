@@ -1,10 +1,5 @@
 import { LinkedList, LinkedListIterator, LinkedListNode } from "../../src/Utils/LinkedList";
 
-const list = new LinkedList(10);
-      const iterator = new LinkedListIterator(list);
-      list.insertAfter(iterator, 20);
-      const newIter = list.remove(iterator);
-
 //Linked List
 describe("constructor", () =>
 {

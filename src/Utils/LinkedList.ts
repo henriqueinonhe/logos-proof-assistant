@@ -201,7 +201,7 @@ export class LinkedListIterator<T>
    */
   public isAtHead() : boolean
   {
-    return this.isValid() && this.node!.previous === null;
+    return this.isValid() && this.node!.isHead();
   }
 
   /**
@@ -215,7 +215,7 @@ export class LinkedListIterator<T>
    */
   public isAtLast() : boolean
   {
-    return this.isValid() && this.node!.next === null;
+    return this.isValid() && this.node!.isLast();
   }
 
   /**
@@ -280,7 +280,6 @@ export class LinkedList<T>
     const beforeInsertedNode = iterator["node"]; //Friendship access
     const afterInsertedNode = iterator["node"]!.next;
     const insertedNode = new LinkedListNode<T>(this, data, beforeInsertedNode, afterInsertedNode);
-
     
     if(beforeInsertedNode!.isLast())
     {
@@ -290,8 +289,10 @@ export class LinkedList<T>
     {
       afterInsertedNode!.previous = insertedNode;
     }
-    
+
     beforeInsertedNode!.next = insertedNode;
+    
+    
     this.length++;
 
     const returnIterator = iterator.clone();
@@ -725,9 +726,9 @@ export class LinkedList<T>
       afterInsertedNode!.previous = transferedNode;
     }
 
-    beforeInsertedNode!.next = transferedNode;
-    transferedNode!.previous = beforeInsertedNode;
     transferedNode!.next = afterInsertedNode;
+    transferedNode!.previous = beforeInsertedNode;
+    beforeInsertedNode!.next = transferedNode;
     
     targetList.length++;
     return returnedIterator;
@@ -756,7 +757,7 @@ export class LinkedList<T>
     //Insert Node At Target List
     transferedNode!.list = targetList; //Transfering node ownership to new list
     const afterInsertedNode = targetListIterator["node"]; //Friendship access
-    const beforeInsertedNode = afterInsertedNode!.previous;
+    const beforeInsertedNode = targetListIterator["node"]!.previous;
     const insertedNode = transferedNode;
 
     if(afterInsertedNode!.isHead())
@@ -767,9 +768,9 @@ export class LinkedList<T>
     {
       beforeInsertedNode!.next = insertedNode;
     }
-    afterInsertedNode!.previous = insertedNode;
     transferedNode!.previous = beforeInsertedNode;
     transferedNode!.next = afterInsertedNode;
+    afterInsertedNode!.previous = insertedNode;
 
     targetList.length++;
 
@@ -795,13 +796,9 @@ export class LinkedList<T>
     else
     {
       const beforeInsertedNode = targetList.iteratorAtLast()["node"]; //Friendship access
-      if(beforeInsertedNode!.isLast())
-      {
-        targetList.last = transferedNode;
-      }
-
-      beforeInsertedNode!.next = transferedNode;
+      targetList.last = transferedNode;
       transferedNode!.previous = beforeInsertedNode;
+      beforeInsertedNode!.next = transferedNode;
     
       targetList.length++;
     }
@@ -809,7 +806,6 @@ export class LinkedList<T>
     return returnedIterator;
   }
 
-  //TEST THIS SHIT
   public transferNodeToBegin(sourceListIterator : LinkedListIterator<T>, targetList : LinkedList<T>) : LinkedListIterator<T>
   {
     this.checkIteratorValidity(sourceListIterator);
