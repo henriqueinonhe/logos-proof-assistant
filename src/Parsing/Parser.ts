@@ -577,33 +577,44 @@ export class Parser
 
 
     //Remove Proxy Nodes
-    // for(const topLevelNode of outputNodeList)
-    // {
-    //   Parser.removeParseTreeProxyNodes(topLevelNode);
-    // }
+    const iterator = outputNodeList.iteratorAtHead();
+    while(iterator.isValid())
+    {
+      Parser.removeParseTreeProxyNodes(iterator.clone());
+      iterator.goToNext();
+    }
 
     return outputNodeList;
   }
 
-  private static removeParseTreeProxyNodes(parentNode : ParseTreeNode) : void
+  private static removeParseTreeProxyNodes(iteratorAtParentNode : LinkedListIterator<ParseTreeNode>) : void
   {
-    for(const childNodeList of parentNode.children)
-    {
-      let nodeIndex = 0;
-      for(const node of childNodeList)
-      {
-        if(node.children.length === 1)
-        {
-          const nodeToBeElevated = node.children[0].atHead(); 
-          const iteratorAtNodeToBeRemoved = childNodeList.iteratorAt(nodeIndex); //This might hurt perfomance, therefore if this causes the algorithm to reach a higher than linear complexity, then we need to pre process the tree to allow constant time random access
-          childNodeList.insertAfter(iteratorAtNodeToBeRemoved, nodeToBeElevated);
-          childNodeList.remove(iteratorAtNodeToBeRemoved);
-        }
+    const parentNode = iteratorAtParentNode.get();
 
-        Parser.removeParseTreeProxyNodes(node);
-        nodeIndex++;
+    for(const childList of parentNode.children)
+    {
+      const iterator = childList.iteratorAtHead();
+      while(iterator.isValid())
+      {
+        Parser.removeParseTreeProxyNodes(iterator.clone());
+        if(!iterator.isValid())
+        {
+          break;
+        }
+        iterator.goToNext();
       }
     }
+
+    if(parentNode.children.length === 1)
+    {
+      const parentNodeSingleChild = parentNode.children[0];
+      const iteratorAtNodeToBeElevated = parentNodeSingleChild.iteratorAtHead();
+      const listThatOwnsParentNode = iteratorAtParentNode.getList();
+      parentNodeSingleChild.transferNodeBefore(iteratorAtNodeToBeElevated, listThatOwnsParentNode, iteratorAtParentNode);
+      listThatOwnsParentNode.remove(iteratorAtParentNode);
+    }
+
+   
   }
 
   private static iteratorIsAtBracketedExpressionStartingPoint(iterator : LinkedListIterator<ParseTreeNode>) : boolean

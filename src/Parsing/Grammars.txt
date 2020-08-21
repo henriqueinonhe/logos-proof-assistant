@@ -1,0 +1,91 @@
+Grammar Without Whitespace (Almost correct, but ambiguous because it lacks whitespace):
+
+Expressions -> Expression Expressions | Expression
+
+Expression -> PrimitiveSymbol |
+              BracketedExpression |
+              FunctionApplication
+
+BracketedExpression -> ( Expressions )
+
+FunctionApplication -> FunctionalSymbol ArgumentLists
+
+ArgumentLists -> ArgumentList ArgumentLists | ArgumentList
+
+ArgumentList ->  ( Arguments )
+
+Arguments -> Expressions , Arguments | Expressions 
+
+--------------------------------------------------------------------------------
+
+Correct Grammar (but not fit to implementation):
+
+Expression -> Whitespace PrimitiveSymbol Whitespace |
+              Whitespace BracketedExpression Whitespace |
+              Whitespace FunctionApplication Whitespace |
+              Whitespace FunctionalSymbol MandatoryWhitespace BracketedExpression Expression |
+              Whitespace NonFunctionalSymbol Whitespace BracketedExpression Expression |
+              Whitespace PrimitiveSymbol Whitespace PrimitiveSymbol Expression |
+              Whitespace PrimitiveSymbol Whitespace FunctionApplication Expression | 
+              Whitespace BracketedExpression Whitespace Expression |
+              Whitespace FunctionApplication Whitespace PrimitiveSymbol Expression |
+              Whitespace FunctionApplication MandatoryWhitespace BracketedExpression Expression |
+              Whitespace FunctionApplication Whitespace FunctionApplication Expression
+
+BracketedExpression -> ( Expression )
+
+FunctionApplication -> FunctionalSymbol ArgumentLists
+
+ArgumentLists -> ArgumentList ArgumentLists | ArgumentList
+
+ArgumentList ->  ( Arguments )
+
+Arguments -> Expression , Arguments | Expression 
+
+PrimitiveSymbol -> FunctionalSymbol | NonFunctionalSymbol 
+
+--------------------------------------------------------------------------------
+
+Grammar To Use For Implementation NOT READY YET!
+
+Expression -> Whitespace ExpressionKernel Whitespace ;
+
+Whitespace -> " " | ;
+
+ExpressionKernel -> FunctionalSymbol FunctionalSymbolFollowUp |
+                    NonFunctionalSymbol NonFunctionalSymbolFollowUp |
+                    BracketedExpression BracketedExpressionFollowUp ;
+
+BracketedExpression -> "(" Expression ")" ;
+
+BracketedExpressionFollowUp -> Expression | ;
+
+NonFunctionalSymbolFollowUp -> Expression | ;
+
+FunctionalSymbolFollowUp -> MandatoryWhitespace BracketedExpression Expression | 
+                            ArgumentLists Expression | 
+                            Whitespace PrimitiveSymbol Expression |
+                            ;
+
+MandatoryWhitespace -> " " ;
+
+PrimitiveSymbol -> FunctionalSymbol | NonFunctionalSymbol ;
+
+ArgumentLists -> ArgumentList NextArgumentList ;
+
+NextArgumentList -> ArgumentList NextArgumentList | ;
+
+ArgumentList -> "(" Arguments ")" ;
+
+Arguments -> Expression NextArgument ;
+
+NextArgument -> "," Expression NextArgument | ;
+
+---------------------------------------------------------------------------------
+
+PEG Version:
+
+Expression -> Whitespace ExpressionKernel ;
+
+ExpressionKernel -> ((FunctionApplication | BracketedExpression | PrimitiveSymbol ) Whitespace)* ;
+

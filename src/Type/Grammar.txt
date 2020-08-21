@@ -1,0 +1,16 @@
+Type System Grammar (Already in LL(2) format):
+
+Type -> PrimitiveType | CompositeType ;
+
+CompositeType -> CompositeTypeFirstArgument "->" CompositeTypeSecondArgument ;
+
+CompositeTypeFirstArgument -> PrimitiveType | 
+                              "(" CompositeType ")" | 
+                              ProductType ;
+
+CompositeTypeSecondArgument -> PrimitiveType |
+                               "(" CompositeType ")" ;
+
+ProductType -> "[" Expression More "]" ;
+
+More -> "," Expression More | EMPTY ;
