@@ -581,6 +581,10 @@ export class Parser
     while(iterator.isValid())
     {
       Parser.removeParseTreeProxyNodes(iterator.clone());
+      if(!iterator.isValid())
+      {
+        break;
+      }
       iterator.goToNext();
     }
 

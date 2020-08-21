@@ -1,52 +1,52 @@
 [
   {
-    "substring": "0 * ((((1)) + (((1)))))",
-    "substringBeginOffset": 0,
-    "substringEndOffset": 22,
+    "substring": "(((((0))))) * (((((((1)) + (((1))))))))",
+    "substringBeginOffset": 1,
+    "substringEndOffset": 39,
     "children": [
       [
         {
           "substring": "*",
-          "substringBeginOffset": 2,
-          "substringEndOffset": 2,
+          "substringBeginOffset": 13,
+          "substringEndOffset": 13,
           "children": []
         }
       ],
       [
         {
           "substring": "0",
-          "substringBeginOffset": 0,
-          "substringEndOffset": 0,
+          "substringBeginOffset": 6,
+          "substringEndOffset": 6,
           "children": []
         }
       ],
       [
         {
           "substring": "((1)) + (((1)))",
-          "substringBeginOffset": 6,
-          "substringEndOffset": 20,
+          "substringBeginOffset": 20,
+          "substringEndOffset": 34,
           "children": [
             [
               {
                 "substring": "+",
-                "substringBeginOffset": 12,
-                "substringEndOffset": 12,
+                "substringBeginOffset": 26,
+                "substringEndOffset": 26,
                 "children": []
               }
             ],
             [
               {
                 "substring": "1",
-                "substringBeginOffset": 8,
-                "substringEndOffset": 8,
+                "substringBeginOffset": 22,
+                "substringEndOffset": 22,
                 "children": []
               }
             ],
             [
               {
                 "substring": "1",
-                "substringBeginOffset": 17,
-                "substringEndOffset": 17,
+                "substringBeginOffset": 31,
+                "substringEndOffset": 31,
                 "children": []
               }
             ]
