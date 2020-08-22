@@ -46,46 +46,16 @@ PrimitiveSymbol -> FunctionalSymbol | NonFunctionalSymbol
 
 --------------------------------------------------------------------------------
 
-Grammar To Use For Implementation NOT READY YET!
+Equivalent Parsing Expression Grammar:
 
-Expression -> Whitespace ExpressionKernel Whitespace ;
+Expression <- Whitespace ((FunctionApplication / BracketedExpression / PrimitiveExpression) Whitespace)+
 
-Whitespace -> " " | ;
+Whitespace <- " "*
 
-ExpressionKernel -> FunctionalSymbol FunctionalSymbolFollowUp |
-                    NonFunctionalSymbol NonFunctionalSymbolFollowUp |
-                    BracketedExpression BracketedExpressionFollowUp ;
+FunctionApplication <- FunctionalSymbol ArgumentList+
 
-BracketedExpression -> "(" Expression ")" ;
+ArgumentList <- "(" Expression ("," Expression)* ")"
 
-BracketedExpressionFollowUp -> Expression | ;
+BracketedExpression <- "(" Expression ")"
 
-NonFunctionalSymbolFollowUp -> Expression | ;
-
-FunctionalSymbolFollowUp -> MandatoryWhitespace BracketedExpression Expression | 
-                            ArgumentLists Expression | 
-                            Whitespace PrimitiveSymbol Expression |
-                            ;
-
-MandatoryWhitespace -> " " ;
-
-PrimitiveSymbol -> FunctionalSymbol | NonFunctionalSymbol ;
-
-ArgumentLists -> ArgumentList NextArgumentList ;
-
-NextArgumentList -> ArgumentList NextArgumentList | ;
-
-ArgumentList -> "(" Arguments ")" ;
-
-Arguments -> Expression NextArgument ;
-
-NextArgument -> "," Expression NextArgument | ;
-
----------------------------------------------------------------------------------
-
-PEG Version:
-
-Expression -> Whitespace ExpressionKernel ;
-
-ExpressionKernel -> ((FunctionApplication | BracketedExpression | PrimitiveSymbol) Whitespace)* ;
-
+PrimitiveExpression <- FunctionalSymbol / NonFunctionalSymbol
