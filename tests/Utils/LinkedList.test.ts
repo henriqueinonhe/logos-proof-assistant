@@ -1,5 +1,35 @@
 import { LinkedList, LinkedListIterator, LinkedListNode } from "../../src/Utils/LinkedList";
 
+//Linked List Node
+
+describe("isHead()", () =>
+{
+  describe("Pre Conditions", () =>
+  {
+    test("Node must be valid", () =>
+    {
+      const list = new LinkedList();
+      const node = new LinkedListNode(list, 10, null, null);
+      node.list = null;
+      expect(() => node.isHead()).toThrow("Node is not valid!");
+    });
+  });
+});
+
+describe("isLast()", () =>
+{
+  describe("Pre Conditions", () =>
+  {
+    test("Node must be valid", () =>
+    {
+      const list = new LinkedList();
+      const node = new LinkedListNode(list, 10, null, null);
+      node.list = null;
+      expect(() => node.isLast()).toThrow("Node is not valid!");
+    });
+  });
+});
+
 //Linked List
 describe("constructor", () =>
 {
@@ -817,10 +847,31 @@ describe("trasnferNodeAfter()", () =>
       expect(iterator.get()).toBe(10);
       expect(iterator.getList()).toBe(target);
     });
+
+    test("Target node is not last", () =>
+    {
+      const source = new LinkedList(10);
+      const target = new LinkedList(20);
+      target.push(30);
+      source.transferNodeAfter(source.iteratorAtHead(), target, target.iteratorAtHead());
+      expect(source.isEmpty()).toBe(true);
+      expect(source["length"]).toBe(0);
+      expect(source["head"]).toBe(null);
+      expect(source["last"]).toBe(null);
+
+      expect(target.size()).toBe(3);
+      expect(target["head"]?.data).toBe(20);
+      expect(target["head"]?.previous).toBe(null);
+      expect(target["head"]?.next!.data).toBe(10);
+      expect(target["last"]?.data).toBe(30);
+      expect(target["last"]?.previous!.data).toBe(10);
+      expect(target["last"]?.next).toBe(null);
+      expect(target["last"]!.list).toBe(target);
+    });
   });
 });
 
-describe("trasnferNodeBefore()", () =>
+describe("transferNodeBefore()", () =>
 {
   describe("Pre Conditions", () =>
   {

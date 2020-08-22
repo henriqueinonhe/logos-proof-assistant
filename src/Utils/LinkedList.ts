@@ -46,12 +46,12 @@ export class LinkedListNode<T>
    * Const.
    * 
    * Pre Conditions:
-   * None
+   * - Node must be valid.
    */
   public isLast() : boolean
   {
     this.checkValidity();
-    return this.next === null;
+    return this.list!["last"] === this;
   }
 
   /**
@@ -59,12 +59,12 @@ export class LinkedListNode<T>
    * Const.
    * 
    * Pre Conditions:
-   * None
+   * - Node must be valid.
    */
   public isHead() : boolean
   {
     this.checkValidity();
-    return this.previous === null;
+    return this.list!["head"] === this;
   }
 
   private checkValidity() : void
@@ -683,17 +683,17 @@ export class LinkedList<T>
   //   return clonedList;
   // }
 
-  public map<MappedType>(callback : (element : T, index ?: number, list ?: LinkedList<T>) => MappedType) : LinkedList<MappedType>
-  {
-    const mappedList = new LinkedList<MappedType>();
-    let index = 0;
-    for(const element of this)
-    {
-      mappedList.push(callback(element, index, this));
-      index++;
-    }
-    return mappedList;
-  }
+  // public map<MappedType>(callback : (element : T, index ?: number, list ?: LinkedList<T>) => MappedType) : LinkedList<MappedType>
+  // {
+  //   const mappedList = new LinkedList<MappedType>();
+  //   let index = 0;
+  //   for(const element of this)
+  //   {
+  //     mappedList.push(callback(element, index, this));
+  //     index++;
+  //   }
+  //   return mappedList;
+  // }
 
   /**
    * Shallow copy of the list to an array.
