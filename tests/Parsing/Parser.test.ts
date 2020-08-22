@@ -31,7 +31,7 @@ symbolTable.addOperatorSymbol("+", 2, 1, 40, OperatorAssociativity.Left);
 symbolTable.addOperatorSymbol("-", 2, 1, 40, OperatorAssociativity.Left);
 symbolTable.addOperatorSymbol("succ", 1, 0, 1, OperatorAssociativity.Left);
 
-// Parser.parse(" ", lexer, signature, symbolTable);
+// Parser.parse(" (1 + 1)", lexer, signature, symbolTable);
 
 describe("private generateOperatorsIteratorQueue()", () =>
 {
@@ -80,7 +80,7 @@ describe("private proccessFunctionApplicatons()", () =>
     const tokenString = lexer.lex(string, signature);
     const nodeList = Parser["convertTokenStringToNodeList"](tokenString);
     const operatorsQueue = Parser["generateOperatorsIteratorQueue"](nodeList, symbolTable);
-    const reducedNodeList = Parser["parseExpression"](nodeList, signature, symbolTable, tokenString);
+    const reducedNodeList = Parser["parseTopMostExpression"](nodeList, signature, symbolTable, tokenString);
     return [reducedNodeList, operatorsQueue];
   }
 
@@ -1910,7 +1910,7 @@ describe("private reduceOperatorApplications()", () =>
     const tokenString = lexer.lex(string, signature);
     const nodeList = Parser["convertTokenStringToNodeList"](tokenString);
     const operatorsIteratorQueue = Parser["generateOperatorsIteratorQueue"](nodeList, symbolTable);
-    const nodeList2 = Parser["parseExpression"](nodeList, signature, symbolTable, tokenString);
+    const nodeList2 = Parser["parseTopMostExpression"](nodeList, signature, symbolTable, tokenString);
     const nodeList3 = Parser["reduceOperatorApplications"](operatorsIteratorQueue, nodeList2, tokenString, signature, symbolTable);
     return nodeList3.toArray().map(node => node["reducedNodeObject"]());
   }
@@ -2985,14 +2985,20 @@ describe("parse()", () =>
       expect(() => Parser.parse(" ) ", lexer, signature, symbolTable)).toThrow(`Found a RightRoundBracketToken `);
       expect(() => Parser.parse(" )( ", lexer, signature, symbolTable)).toThrow(`Found a RightRoundBracketToken `);
 
-      expect(() => Parser.parse(" (1 + 1)) ", lexer, signature, symbolTable)).toThrow(`Found a RightRoundBracketToken `);
+      
+    });
+
+    test("String should have ended", () =>
+    {
+      expect(() => Parser.parse(" (1 + 1)) ", lexer, signature, symbolTable)).toThrow("String should have ended here!");
+
+      expect(() => Parser.parse(" (1 + 1), ", lexer, signature, symbolTable)).toThrow(`String should have ended here!`);
     });
 
     test(`Whitespace (ExpressionKernel Whitespace)* ","`, () =>
     {
       expect(() => Parser.parse(" , ", lexer, signature, symbolTable)).toThrow(`Found a CommaToken `);
 
-      expect(() => Parser.parse(" (1 + 1), ", lexer, signature, symbolTable)).toThrow(`Found a CommaToken `);
     });
 
     test(`FunctionalSymbol "(" Expression ("," Expression)* `, () =>

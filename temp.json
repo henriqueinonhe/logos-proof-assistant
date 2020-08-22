@@ -1,256 +1,27 @@
 [
   {
-    "substring": "1 + 1 * f(1 + 1 - 1 + 0, ((((((0)))))), ((f(1 - 1)))) + ((((0)) + ((0))))",
-    "substringBeginOffset": 0,
-    "substringEndOffset": 72,
+    "substring": "(1 + 1)",
+    "substringBeginOffset": 1,
+    "substringEndOffset": 7,
     "children": [
       [
         {
-          "substring": "+",
-          "substringBeginOffset": 54,
-          "substringEndOffset": 54,
+          "substring": "1",
+          "substringBeginOffset": 2,
+          "substringEndOffset": 2,
           "children": []
-        }
-      ],
-      [
+        },
         {
-          "substring": "1 + 1 * f(1 + 1 - 1 + 0, ((((((0)))))), ((f(1 - 1))))",
-          "substringBeginOffset": 0,
-          "substringEndOffset": 52,
-          "children": [
-            [
-              {
-                "substring": "+",
-                "substringBeginOffset": 2,
-                "substringEndOffset": 2,
-                "children": []
-              }
-            ],
-            [
-              {
-                "substring": "1",
-                "substringBeginOffset": 0,
-                "substringEndOffset": 0,
-                "children": []
-              }
-            ],
-            [
-              {
-                "substring": "1 * f(1 + 1 - 1 + 0, ((((((0)))))), ((f(1 - 1))))",
-                "substringBeginOffset": 4,
-                "substringEndOffset": 52,
-                "children": [
-                  [
-                    {
-                      "substring": "*",
-                      "substringBeginOffset": 6,
-                      "substringEndOffset": 6,
-                      "children": []
-                    }
-                  ],
-                  [
-                    {
-                      "substring": "1",
-                      "substringBeginOffset": 4,
-                      "substringEndOffset": 4,
-                      "children": []
-                    }
-                  ],
-                  [
-                    {
-                      "substring": "f(1 + 1 - 1 + 0, ((((((0)))))), ((f(1 - 1))))",
-                      "substringBeginOffset": 8,
-                      "substringEndOffset": 52,
-                      "children": [
-                        [
-                          {
-                            "substring": "f",
-                            "substringBeginOffset": 8,
-                            "substringEndOffset": 8,
-                            "children": []
-                          }
-                        ],
-                        [
-                          {
-                            "substring": "1 + 1 - 1 + 0",
-                            "substringBeginOffset": 10,
-                            "substringEndOffset": 22,
-                            "children": [
-                              [
-                                {
-                                  "substring": "+",
-                                  "substringBeginOffset": 20,
-                                  "substringEndOffset": 20,
-                                  "children": []
-                                }
-                              ],
-                              [
-                                {
-                                  "substring": "1 + 1 - 1",
-                                  "substringBeginOffset": 10,
-                                  "substringEndOffset": 18,
-                                  "children": [
-                                    [
-                                      {
-                                        "substring": "-",
-                                        "substringBeginOffset": 16,
-                                        "substringEndOffset": 16,
-                                        "children": []
-                                      }
-                                    ],
-                                    [
-                                      {
-                                        "substring": "1 + 1",
-                                        "substringBeginOffset": 10,
-                                        "substringEndOffset": 14,
-                                        "children": [
-                                          [
-                                            {
-                                              "substring": "+",
-                                              "substringBeginOffset": 12,
-                                              "substringEndOffset": 12,
-                                              "children": []
-                                            }
-                                          ],
-                                          [
-                                            {
-                                              "substring": "1",
-                                              "substringBeginOffset": 10,
-                                              "substringEndOffset": 10,
-                                              "children": []
-                                            }
-                                          ],
-                                          [
-                                            {
-                                              "substring": "1",
-                                              "substringBeginOffset": 14,
-                                              "substringEndOffset": 14,
-                                              "children": []
-                                            }
-                                          ]
-                                        ]
-                                      }
-                                    ],
-                                    [
-                                      {
-                                        "substring": "1",
-                                        "substringBeginOffset": 18,
-                                        "substringEndOffset": 18,
-                                        "children": []
-                                      }
-                                    ]
-                                  ]
-                                }
-                              ],
-                              [
-                                {
-                                  "substring": "0",
-                                  "substringBeginOffset": 22,
-                                  "substringEndOffset": 22,
-                                  "children": []
-                                }
-                              ]
-                            ]
-                          }
-                        ],
-                        [
-                          {
-                            "substring": "0",
-                            "substringBeginOffset": 31,
-                            "substringEndOffset": 31,
-                            "children": []
-                          }
-                        ],
-                        [
-                          {
-                            "substring": "f(1 - 1)",
-                            "substringBeginOffset": 42,
-                            "substringEndOffset": 49,
-                            "children": [
-                              [
-                                {
-                                  "substring": "f",
-                                  "substringBeginOffset": 42,
-                                  "substringEndOffset": 42,
-                                  "children": []
-                                }
-                              ],
-                              [
-                                {
-                                  "substring": "1 - 1",
-                                  "substringBeginOffset": 44,
-                                  "substringEndOffset": 48,
-                                  "children": [
-                                    [
-                                      {
-                                        "substring": "-",
-                                        "substringBeginOffset": 46,
-                                        "substringEndOffset": 46,
-                                        "children": []
-                                      }
-                                    ],
-                                    [
-                                      {
-                                        "substring": "1",
-                                        "substringBeginOffset": 44,
-                                        "substringEndOffset": 44,
-                                        "children": []
-                                      }
-                                    ],
-                                    [
-                                      {
-                                        "substring": "1",
-                                        "substringBeginOffset": 48,
-                                        "substringEndOffset": 48,
-                                        "children": []
-                                      }
-                                    ]
-                                  ]
-                                }
-                              ]
-                            ]
-                          }
-                        ]
-                      ]
-                    }
-                  ]
-                ]
-              }
-            ]
-          ]
-        }
-      ],
-      [
+          "substring": "+",
+          "substringBeginOffset": 4,
+          "substringEndOffset": 4,
+          "children": []
+        },
         {
-          "substring": "((0)) + ((0))",
-          "substringBeginOffset": 58,
-          "substringEndOffset": 70,
-          "children": [
-            [
-              {
-                "substring": "+",
-                "substringBeginOffset": 64,
-                "substringEndOffset": 64,
-                "children": []
-              }
-            ],
-            [
-              {
-                "substring": "0",
-                "substringBeginOffset": 60,
-                "substringEndOffset": 60,
-                "children": []
-              }
-            ],
-            [
-              {
-                "substring": "0",
-                "substringBeginOffset": 68,
-                "substringEndOffset": 68,
-                "children": []
-              }
-            ]
-          ]
+          "substring": "1",
+          "substringBeginOffset": 6,
+          "substringEndOffset": 6,
+          "children": []
         }
       ]
     ]
