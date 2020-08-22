@@ -48,7 +48,9 @@ PrimitiveSymbol -> FunctionalSymbol | NonFunctionalSymbol
 
 Equivalent Parsing Expression Grammar:
 
-Expression <- Whitespace ((FunctionApplication / BracketedExpression / PrimitiveExpression) Whitespace)+
+Expression <- Whitespace (ExpressionKernel Whitespace)+
+
+ExpressionKernel <- FunctionApplication / BracketedExpression / PrimitiveExpression
 
 Whitespace <- " "*
 

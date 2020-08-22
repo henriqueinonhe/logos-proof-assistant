@@ -34,7 +34,7 @@ describe("Class Invariants", () =>
 
   test("Error message is rendered correctly", () =>
   {
-    expect(new ParsingException("There are unmatched parenthesis!", 3, 6, "(2+(3+4)").message).toBe("There are unmatched parenthesis!\n(2+(3+4)\n   ^^^^ ");
+    expect(new ParsingException("There are unmatched parenthesis!", 3, 6, "(2+(3+4)").message).toBe("There are unmatched parenthesis!\n(2+(3+4)\n   ^^^^  ");
   });
 
   test("ParsingException is instanceof Error", () =>

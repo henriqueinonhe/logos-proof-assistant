@@ -66,7 +66,7 @@ export class ParsingException extends Error
     const inclusiveEndIndexCompensation = 1;
     const beforeErrorSectionSubstring = string.slice(0, errorBeginOffset);
     const errorSectionSubstring = string.slice(errorBeginOffset, errorEndOffset + inclusiveEndIndexCompensation);
-    const afterErrorSectionSubstring = string.slice(errorEndOffset + inclusiveEndIndexCompensation);
+    const afterErrorSectionSubstring = string.slice(errorEndOffset);
     const startPad = " ".repeat(beforeErrorSectionSubstring.toString().length);
     const highlight = "^".repeat(errorSectionSubstring.toString().length);
     const endPad = " ".repeat(afterErrorSectionSubstring.toString().length);

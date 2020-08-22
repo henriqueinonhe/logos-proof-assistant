@@ -31,45 +31,14 @@ symbolTable.addOperatorSymbol("+", 2, 1, 40, OperatorAssociativity.Left);
 symbolTable.addOperatorSymbol("-", 2, 1, 40, OperatorAssociativity.Left);
 symbolTable.addOperatorSymbol("succ", 1, 0, 1, OperatorAssociativity.Left);
 
-Parser.parse("1 + 1 * f(1 + 1 - 1 + 0, ((((((0)))))), ((f(1 - 1)))) + ((((0)) + ((0))))", lexer, signature, symbolTable);
-
-describe("private convertTokenStringToNodeListAndHandleBrackets()", () =>
-{
-  const lexer = new LogosLexer();
-  const signature = new LogosSignature();
-  signature.addRecord("0", new TypedTokenRecord(new Type("i")));
-  signature.addRecord("1", new TypedTokenRecord(new Type("i")));
-  signature.addRecord("+", new TypedTokenRecord(new Type("i")));
-
-  describe("Pre Conditions", () =>
-  {
-    test("Unmatched brackets", () =>
-    {
-      expect(() => Parser["convertTokenStringToNodeListAndHandleBrackets"](lexer.lex("1 1 ) (", signature))).toThrow("Brackets at the following indexes are unmatched: 6, 4");
-      expect(() => Parser["convertTokenStringToNodeListAndHandleBrackets"](lexer.lex(")))1 1 ) (", signature))).toThrow("Brackets at the following indexes are unmatched: 9, 0, 1, 2, 7");
-      expect(() => Parser["convertTokenStringToNodeListAndHandleBrackets"](lexer.lex(") ( )1 1 ) (", signature))).toThrow("Brackets at the following indexes are unmatched: 11, 0, 9");
-    });
-  });
-
-  describe("Post Conditions", () =>
-  {
-    test("Bracket iterators are properly set and tokens wrapped", () =>
-    {
-      const tokenWrapperList = Parser["convertTokenStringToNodeListAndHandleBrackets"](lexer.lex("(((0 + 1) + 1) + ((0 + 1) + 1))", signature));
-      for(let index = 0; index < tokenWrapperList.size(); index++)
-      {
-        expect(tokenWrapperList.at(index).substringBeginOffset).toBe(index);
-      }
-    });
-  });
-});
+// Parser.parse(" ", lexer, signature, symbolTable);
 
 describe("private generateOperatorsIteratorQueue()", () =>
 {
   function processString(string : string, lexer : Lexer, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable) : Array<LinkedListIterator<ParseTreeNode>>
   {
     const tokenString = lexer.lex(string, signature);
-    const nodeList = Parser["convertTokenStringToNodeListAndHandleBrackets"](tokenString);
+    const nodeList = Parser["convertTokenStringToNodeList"](tokenString);
     return Parser["generateOperatorsIteratorQueue"](nodeList, symbolTable);
   }
 
@@ -109,7 +78,7 @@ describe("private proccessFunctionApplicatons()", () =>
   function processString(string : string, lexer : Lexer, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable) : [LinkedList<ParseTreeNode>, Array<LinkedListIterator<ParseTreeNode>>]
   {
     const tokenString = lexer.lex(string, signature);
-    const nodeList = Parser["convertTokenStringToNodeListAndHandleBrackets"](tokenString);
+    const nodeList = Parser["convertTokenStringToNodeList"](tokenString);
     const operatorsQueue = Parser["generateOperatorsIteratorQueue"](nodeList, symbolTable);
     const reducedNodeList = Parser["reduceFunctionApplicationsAndBracketedExpressions"](nodeList, signature, symbolTable, tokenString);
     return [reducedNodeList, operatorsQueue];
@@ -1939,7 +1908,7 @@ describe("private reduceOperatorApplications()", () =>
   function processString(string : string) : object
   {
     const tokenString = lexer.lex(string, signature);
-    const nodeList = Parser["convertTokenStringToNodeListAndHandleBrackets"](tokenString);
+    const nodeList = Parser["convertTokenStringToNodeList"](tokenString);
     const operatorsIteratorQueue = Parser["generateOperatorsIteratorQueue"](nodeList, symbolTable);
     const nodeList2 = Parser["reduceFunctionApplicationsAndBracketedExpressions"](nodeList, signature, symbolTable, tokenString);
     const nodeList3 = Parser["reduceOperatorApplications"](operatorsIteratorQueue, nodeList2, tokenString, signature, symbolTable);
@@ -2974,4 +2943,66 @@ describe("private reduceOperatorApplications()", () =>
 
 
 
+});
+
+describe("parse()", () =>
+{
+  const lexer = new LogosLexer();
+  const signature = new LogosSignature();
+  signature.addRecord("0", new TypedTokenRecord(new Type("i")));
+  signature.addRecord("1", new TypedTokenRecord(new Type("i")));
+  signature.addRecord("f", new TypedTokenRecord(new Type("i->i")));
+  signature.addRecord("+", new TypedTokenRecord(new Type("[i,i]->i")));
+  signature.addRecord("*", new TypedTokenRecord(new Type("[i,i]->i")));
+  signature.addRecord("-", new TypedTokenRecord(new Type("[i,i]->i")));
+  signature.addRecord(":", new TypedTokenRecord(new Type("[i,i]->i")));
+  signature.addRecord("^", new TypedTokenRecord(new Type("[i,i]->i")));
+  signature.addRecord("succ", new TypedTokenRecord(new Type("i->i")));
+
+  const symbolTable = new FunctionalSymbolsAndOperatorsTable();
+  symbolTable.addFunctionalSymbol("f");
+  symbolTable.addOperatorSymbol("^", 2, 1, 10, OperatorAssociativity.Left);
+  symbolTable.addOperatorSymbol("*", 2, 1, 20, OperatorAssociativity.Left);
+  symbolTable.addOperatorSymbol(":", 2, 1, 30, OperatorAssociativity.Left);
+  symbolTable.addOperatorSymbol("+", 2, 1, 40, OperatorAssociativity.Left);
+  symbolTable.addOperatorSymbol("-", 2, 1, 40, OperatorAssociativity.Left);
+  symbolTable.addOperatorSymbol("succ", 1, 0, 1, OperatorAssociativity.Left);
+
+  describe("Pre Conditions", () =>
+  {
+    test("String must not be empty", () =>
+    {
+      expect(() => Parser.parse("", lexer, signature, symbolTable)).toThrow("Cannot parse empty string!");
+    });
+
+    test("String must contain at least one expression kernel", () =>
+    {
+      expect(() => Parser.parse(" ", lexer, signature, symbolTable)).toThrow("Premature end of string");
+    });
+
+    test(`Whitespace (ExpressionKernel Whitespace)* ")"`, () =>
+    {
+      expect(() => Parser.parse(" ) ", lexer, signature, symbolTable)).toThrow(`Found a RightRoundBracketToken `);
+      expect(() => Parser.parse(" )( ", lexer, signature, symbolTable)).toThrow(`Found a RightRoundBracketToken `);
+
+      expect(() => Parser.parse(" (1 + 1)) ", lexer, signature, symbolTable)).toThrow(`Found a RightRoundBracketToken `);
+    });
+
+    test(`Whitespace (ExpressionKernel Whitespace)* ","`, () =>
+    {
+      expect(() => Parser.parse(" , ", lexer, signature, symbolTable)).toThrow(`Found a CommaToken `);
+
+      expect(() => Parser.parse(" (1 + 1), ", lexer, signature, symbolTable)).toThrow(`Found a CommaToken `);
+    });
+
+    test(`FunctionalSymbol "(" Expression ("," Expression)* `, () =>
+    {
+      // expect(() => Parser.parse(" f(1 ", lexer, signature, symbolTable)).toThrow(`Premature end of string`);
+    });
+  });
+
+  describe("Post Conditions", () =>
+  {
+
+  });
 });

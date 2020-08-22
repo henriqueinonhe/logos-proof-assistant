@@ -65,6 +65,11 @@ export class ParseTreeNode
     return this.children.length === 0;
   }
 
+  public getInputTokenString() : TokenString
+  {
+    return this.inputTokenString;
+  }
+
   private inputTokenString : TokenString;
   //public parent : ParseTreeNode | null;
   public children : Array<LinkedList<ParseTreeNode>>;
