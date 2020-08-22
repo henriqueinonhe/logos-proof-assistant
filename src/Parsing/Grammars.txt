@@ -87,5 +87,5 @@ PEG Version:
 
 Expression -> Whitespace ExpressionKernel ;
 
-ExpressionKernel -> ((FunctionApplication | BracketedExpression | PrimitiveSymbol ) Whitespace)* ;
+ExpressionKernel -> ((FunctionApplication | BracketedExpression | PrimitiveSymbol) Whitespace)* ;
 

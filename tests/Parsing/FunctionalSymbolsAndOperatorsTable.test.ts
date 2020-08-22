@@ -78,6 +78,7 @@ describe("addOperatorSymbol()", () =>
       const table = new FunctionalSymbolsAndOperatorsTable();
       table.addOperatorSymbol("f", 1, 0, 0, OperatorAssociativity.Left);
       expect(() => table.addOperatorSymbol("-", 2, 1, 0, OperatorAssociativity.Right)).toThrow("different associativity!");
+      expect(() => table.addOperatorSymbol("g", 1, 0, 0, OperatorAssociativity.Right)).toThrow("different associativity!");
     });
   });
 
@@ -92,6 +93,25 @@ describe("addOperatorSymbol()", () =>
       expect(record?.operatorPosition).toBe(1);
       expect(record?.precedence).toBe(10);
       expect(record?.associativity).toBe(OperatorAssociativity.Left);
+    });
+
+    test("Accepts operators with same precedence and associativity", () =>
+    {
+      const table = new FunctionalSymbolsAndOperatorsTable();
+      table.addOperatorSymbol("+", 2, 1, 10, OperatorAssociativity.Left);
+      table.addOperatorSymbol("-", 2, 1, 10, OperatorAssociativity.Left);
+      const record1 = table.getOperatorRecord("+");
+      const record2 = table.getOperatorRecord("-");
+
+      expect(record1?.arity).toBe(2);
+      expect(record1?.operatorPosition).toBe(1);
+      expect(record1?.precedence).toBe(10);
+      expect(record1?.associativity).toBe(OperatorAssociativity.Left);
+
+      expect(record2?.arity).toBe(2);
+      expect(record2?.operatorPosition).toBe(1);
+      expect(record2?.precedence).toBe(10);
+      expect(record2?.associativity).toBe(OperatorAssociativity.Left);
     });
   });
 });
@@ -146,6 +166,29 @@ describe("getOperatorRecord()", () =>
     {
       table.addOperatorSymbol("+", 2, 1, 0, OperatorAssociativity.Left);
       expect(table.getOperatorRecord("+")).toStrictEqual(new OperatorRecord(2, 1, 0, OperatorAssociativity.Left));
+    });
+  });
+});
+
+describe("getFunctionalSymbolsSet()", () =>
+{
+  describe("Post Conditions", () =>
+  {
+    const table = new FunctionalSymbolsAndOperatorsTable();
+    table.addFunctionalSymbol("f");
+    table.addFunctionalSymbol("g");
+
+    test("Returns table correctly", () =>
+    {
+      expect(table.getFunctionalSymbolsSet().has("f")).toBe(true);
+      expect(table.getFunctionalSymbolsSet().has("g")).toBe(true);
+      expect(table.getFunctionalSymbolsSet().has("h")).toBe(false);
+    });
+
+    test("Modifying returned table doesn't affect original", () =>
+    {
+      table.getFunctionalSymbolsSet().clear();
+      expect(table.tokenIsFunctionalSymbol("f")).toBe(true);
     });
   });
 });

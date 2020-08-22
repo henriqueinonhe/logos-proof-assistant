@@ -92,8 +92,8 @@ export class FunctionalSymbolsAndOperatorsTable
     for(const operator of this.operatorsRecordsTable.keys())
     {
       const operatorRecord = this.operatorsRecordsTable.get(operator);
-      if(operatorRecord?.precedence === precedence &&
-         operatorRecord.associativity !== associativity)
+      if(operatorRecord!.precedence === precedence &&
+         operatorRecord!.associativity !== associativity)
       {
         operatorsWithAssociativityConflict.push(operator);
       }

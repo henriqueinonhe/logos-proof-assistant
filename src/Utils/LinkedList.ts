@@ -28,17 +28,39 @@ export class LinkedListNode<T>
     this.next = next;
   }
 
+  /**
+   * Returns whether this node is valid, that is, 
+   * if it belongs to a list.
+   * Const.
+   * 
+   * Pre Conditions:
+   * None
+   */
   public isValid() : boolean
   {
     return this.list !== null;
   }
 
+  /**
+   * Returns whether this node is the last node in a list.
+   * Const.
+   * 
+   * Pre Conditions:
+   * None
+   */
   public isLast() : boolean
   {
     this.checkValidity();
     return this.next === null;
   }
 
+  /**
+   * Returns whether this node is the first in a list.
+   * Const.
+   * 
+   * Pre Conditions:
+   * None
+   */
   public isHead() : boolean
   {
     this.checkValidity();

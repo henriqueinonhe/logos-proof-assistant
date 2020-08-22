@@ -20,16 +20,18 @@ signature.addRecord("*", new TypedTokenRecord(new Type("[i,i]->i")));
 signature.addRecord("-", new TypedTokenRecord(new Type("[i,i]->i")));
 signature.addRecord(":", new TypedTokenRecord(new Type("[i,i]->i")));
 signature.addRecord("^", new TypedTokenRecord(new Type("[i,i]->i")));
+signature.addRecord("succ", new TypedTokenRecord(new Type("i->i")));
 
 const symbolTable = new FunctionalSymbolsAndOperatorsTable();
 symbolTable.addFunctionalSymbol("f");
 symbolTable.addOperatorSymbol("^", 2, 1, 10, OperatorAssociativity.Left);
 symbolTable.addOperatorSymbol("*", 2, 1, 20, OperatorAssociativity.Left);
 symbolTable.addOperatorSymbol(":", 2, 1, 30, OperatorAssociativity.Left);
-symbolTable.addOperatorSymbol("+", 2, 1, 40, OperatorAssociativity.Right);
-symbolTable.addOperatorSymbol("-", 2, 1, 50, OperatorAssociativity.Left);
+symbolTable.addOperatorSymbol("+", 2, 1, 40, OperatorAssociativity.Left);
+symbolTable.addOperatorSymbol("-", 2, 1, 40, OperatorAssociativity.Left);
+symbolTable.addOperatorSymbol("succ", 1, 0, 1, OperatorAssociativity.Left);
 
-Parser.parse("((((((0))))) * (((((((1)) + (((1)))))))))", lexer, signature, symbolTable);
+Parser.parse("1 + 1 * f(1 + 1 - 1 + 0, ((((((0)))))), ((f(1 - 1)))) + ((((0)) + ((0))))", lexer, signature, symbolTable);
 
 describe("private convertTokenStringToNodeListAndHandleBrackets()", () =>
 {
@@ -1906,5 +1908,1070 @@ describe("private proccessFunctionApplicatons()", () =>
       ]);
     });
   });
+
+
+
 });
 
+describe("private reduceOperatorApplications()", () =>
+{
+  const lexer = new LogosLexer();
+  const signature = new LogosSignature();
+  signature.addRecord("0", new TypedTokenRecord(new Type("i")));
+  signature.addRecord("1", new TypedTokenRecord(new Type("i")));
+  signature.addRecord("f", new TypedTokenRecord(new Type("i->i")));
+  signature.addRecord("+", new TypedTokenRecord(new Type("[i,i]->i")));
+  signature.addRecord("*", new TypedTokenRecord(new Type("[i,i]->i")));
+  signature.addRecord("-", new TypedTokenRecord(new Type("[i,i]->i")));
+  signature.addRecord(":", new TypedTokenRecord(new Type("[i,i]->i")));
+  signature.addRecord("^", new TypedTokenRecord(new Type("[i,i]->i")));
+  signature.addRecord("succ", new TypedTokenRecord(new Type("i->i")));
+
+  const symbolTable = new FunctionalSymbolsAndOperatorsTable();
+  symbolTable.addFunctionalSymbol("f");
+  symbolTable.addOperatorSymbol("^", 2, 1, 10, OperatorAssociativity.Right);
+  symbolTable.addOperatorSymbol("*", 2, 1, 20, OperatorAssociativity.Left);
+  symbolTable.addOperatorSymbol(":", 2, 1, 30, OperatorAssociativity.Left);
+  symbolTable.addOperatorSymbol("+", 2, 1, 40, OperatorAssociativity.Left);
+  symbolTable.addOperatorSymbol("-", 2, 1, 40, OperatorAssociativity.Left);
+  symbolTable.addOperatorSymbol("succ", 1, 0, 1, OperatorAssociativity.Left);
+
+  function processString(string : string) : object
+  {
+    const tokenString = lexer.lex(string, signature);
+    const nodeList = Parser["convertTokenStringToNodeListAndHandleBrackets"](tokenString);
+    const operatorsIteratorQueue = Parser["generateOperatorsIteratorQueue"](nodeList, symbolTable);
+    const nodeList2 = Parser["reduceFunctionApplicationsAndBracketedExpressions"](nodeList, signature, symbolTable, tokenString);
+    const nodeList3 = Parser["reduceOperatorApplications"](operatorsIteratorQueue, nodeList2, tokenString, signature, symbolTable);
+    return nodeList3.toArray().map(node => node["reducedNodeObject"]());
+  }
+
+
+  describe("Pre Conditions", () =>
+  {
+
+  });
+
+  describe("Post Conditions", () =>
+  {
+    describe("No Bracketed Expressions", () =>
+    {
+      test("Single infix operator", () =>
+      {
+        expect(processString("1 + 1")).toStrictEqual([
+          {
+            "substring": "1 + 1",
+            "substringBeginOffset": 0,
+            "substringEndOffset": 4,
+            "children": [
+              [
+                {
+                  "substring": "+",
+                  "substringBeginOffset": 2,
+                  "substringEndOffset": 2,
+                  "children": []
+                }
+              ],
+              [
+                {
+                  "substring": "1",
+                  "substringBeginOffset": 0,
+                  "substringEndOffset": 0,
+                  "children": []
+                }
+              ],
+              [
+                {
+                  "substring": "1",
+                  "substringBeginOffset": 4,
+                  "substringEndOffset": 4,
+                  "children": []
+                }
+              ]
+            ]
+          }
+        ]);
+
+        expect(processString("1 * 0")).toStrictEqual([
+          {
+            "substring": "1 * 0",
+            "substringBeginOffset": 0,
+            "substringEndOffset": 4,
+            "children": [
+              [
+                {
+                  "substring": "*",
+                  "substringBeginOffset": 2,
+                  "substringEndOffset": 2,
+                  "children": []
+                }
+              ],
+              [
+                {
+                  "substring": "1",
+                  "substringBeginOffset": 0,
+                  "substringEndOffset": 0,
+                  "children": []
+                }
+              ],
+              [
+                {
+                  "substring": "0",
+                  "substringBeginOffset": 4,
+                  "substringEndOffset": 4,
+                  "children": []
+                }
+              ]
+            ]
+          }
+        ]);
+      });
+
+      test("Various operators with different precedence", () =>
+      {
+        expect(processString("succ 1 + 1 * 1 ^ 0 : 1")).toStrictEqual([
+          {
+            "substring": "succ 1 + 1 * 1 ^ 0 : 1",
+            "substringBeginOffset": 0,
+            "substringEndOffset": 18,
+            "children": [
+              [
+                {
+                  "substring": "+",
+                  "substringBeginOffset": 4,
+                  "substringEndOffset": 4,
+                  "children": []
+                }
+              ],
+              [
+                {
+                  "substring": "succ 1",
+                  "substringBeginOffset": 0,
+                  "substringEndOffset": 2,
+                  "children": [
+                    [
+                      {
+                        "substring": "succ",
+                        "substringBeginOffset": 0,
+                        "substringEndOffset": 0,
+                        "children": []
+                      }
+                    ],
+                    [
+                      {
+                        "substring": "1",
+                        "substringBeginOffset": 2,
+                        "substringEndOffset": 2,
+                        "children": []
+                      }
+                    ]
+                  ]
+                }
+              ],
+              [
+                {
+                  "substring": "1 * 1 ^ 0 : 1",
+                  "substringBeginOffset": 6,
+                  "substringEndOffset": 18,
+                  "children": [
+                    [
+                      {
+                        "substring": ":",
+                        "substringBeginOffset": 16,
+                        "substringEndOffset": 16,
+                        "children": []
+                      }
+                    ],
+                    [
+                      {
+                        "substring": "1 * 1 ^ 0",
+                        "substringBeginOffset": 6,
+                        "substringEndOffset": 14,
+                        "children": [
+                          [
+                            {
+                              "substring": "*",
+                              "substringBeginOffset": 8,
+                              "substringEndOffset": 8,
+                              "children": []
+                            }
+                          ],
+                          [
+                            {
+                              "substring": "1",
+                              "substringBeginOffset": 6,
+                              "substringEndOffset": 6,
+                              "children": []
+                            }
+                          ],
+                          [
+                            {
+                              "substring": "1 ^ 0",
+                              "substringBeginOffset": 10,
+                              "substringEndOffset": 14,
+                              "children": [
+                                [
+                                  {
+                                    "substring": "^",
+                                    "substringBeginOffset": 12,
+                                    "substringEndOffset": 12,
+                                    "children": []
+                                  }
+                                ],
+                                [
+                                  {
+                                    "substring": "1",
+                                    "substringBeginOffset": 10,
+                                    "substringEndOffset": 10,
+                                    "children": []
+                                  }
+                                ],
+                                [
+                                  {
+                                    "substring": "0",
+                                    "substringBeginOffset": 14,
+                                    "substringEndOffset": 14,
+                                    "children": []
+                                  }
+                                ]
+                              ]
+                            }
+                          ]
+                        ]
+                      }
+                    ],
+                    [
+                      {
+                        "substring": "1",
+                        "substringBeginOffset": 18,
+                        "substringEndOffset": 18,
+                        "children": []
+                      }
+                    ]
+                  ]
+                }
+              ]
+            ]
+          }
+        ]);
+      });
+
+      test("Operators with same precedence", () =>
+      {
+        expect(processString("1 + 1 + 1 + 1 + 1")).toStrictEqual([
+          {
+            "substring": "1 + 1 + 1 + 1 + 1",
+            "substringBeginOffset": 0,
+            "substringEndOffset": 16,
+            "children": [
+              [
+                {
+                  "substring": "+",
+                  "substringBeginOffset": 14,
+                  "substringEndOffset": 14,
+                  "children": []
+                }
+              ],
+              [
+                {
+                  "substring": "1 + 1 + 1 + 1",
+                  "substringBeginOffset": 0,
+                  "substringEndOffset": 12,
+                  "children": [
+                    [
+                      {
+                        "substring": "+",
+                        "substringBeginOffset": 10,
+                        "substringEndOffset": 10,
+                        "children": []
+                      }
+                    ],
+                    [
+                      {
+                        "substring": "1 + 1 + 1",
+                        "substringBeginOffset": 0,
+                        "substringEndOffset": 8,
+                        "children": [
+                          [
+                            {
+                              "substring": "+",
+                              "substringBeginOffset": 6,
+                              "substringEndOffset": 6,
+                              "children": []
+                            }
+                          ],
+                          [
+                            {
+                              "substring": "1 + 1",
+                              "substringBeginOffset": 0,
+                              "substringEndOffset": 4,
+                              "children": [
+                                [
+                                  {
+                                    "substring": "+",
+                                    "substringBeginOffset": 2,
+                                    "substringEndOffset": 2,
+                                    "children": []
+                                  }
+                                ],
+                                [
+                                  {
+                                    "substring": "1",
+                                    "substringBeginOffset": 0,
+                                    "substringEndOffset": 0,
+                                    "children": []
+                                  }
+                                ],
+                                [
+                                  {
+                                    "substring": "1",
+                                    "substringBeginOffset": 4,
+                                    "substringEndOffset": 4,
+                                    "children": []
+                                  }
+                                ]
+                              ]
+                            }
+                          ],
+                          [
+                            {
+                              "substring": "1",
+                              "substringBeginOffset": 8,
+                              "substringEndOffset": 8,
+                              "children": []
+                            }
+                          ]
+                        ]
+                      }
+                    ],
+                    [
+                      {
+                        "substring": "1",
+                        "substringBeginOffset": 12,
+                        "substringEndOffset": 12,
+                        "children": []
+                      }
+                    ]
+                  ]
+                }
+              ],
+              [
+                {
+                  "substring": "1",
+                  "substringBeginOffset": 16,
+                  "substringEndOffset": 16,
+                  "children": []
+                }
+              ]
+            ]
+          }
+        ]);
+
+        expect(processString("1 + 1 - 1 + 1 - 1")).toStrictEqual([
+          {
+            "substring": "1 + 1 - 1 + 1 - 1",
+            "substringBeginOffset": 0,
+            "substringEndOffset": 16,
+            "children": [
+              [
+                {
+                  "substring": "-",
+                  "substringBeginOffset": 14,
+                  "substringEndOffset": 14,
+                  "children": []
+                }
+              ],
+              [
+                {
+                  "substring": "1 + 1 - 1 + 1",
+                  "substringBeginOffset": 0,
+                  "substringEndOffset": 12,
+                  "children": [
+                    [
+                      {
+                        "substring": "+",
+                        "substringBeginOffset": 10,
+                        "substringEndOffset": 10,
+                        "children": []
+                      }
+                    ],
+                    [
+                      {
+                        "substring": "1 + 1 - 1",
+                        "substringBeginOffset": 0,
+                        "substringEndOffset": 8,
+                        "children": [
+                          [
+                            {
+                              "substring": "-",
+                              "substringBeginOffset": 6,
+                              "substringEndOffset": 6,
+                              "children": []
+                            }
+                          ],
+                          [
+                            {
+                              "substring": "1 + 1",
+                              "substringBeginOffset": 0,
+                              "substringEndOffset": 4,
+                              "children": [
+                                [
+                                  {
+                                    "substring": "+",
+                                    "substringBeginOffset": 2,
+                                    "substringEndOffset": 2,
+                                    "children": []
+                                  }
+                                ],
+                                [
+                                  {
+                                    "substring": "1",
+                                    "substringBeginOffset": 0,
+                                    "substringEndOffset": 0,
+                                    "children": []
+                                  }
+                                ],
+                                [
+                                  {
+                                    "substring": "1",
+                                    "substringBeginOffset": 4,
+                                    "substringEndOffset": 4,
+                                    "children": []
+                                  }
+                                ]
+                              ]
+                            }
+                          ],
+                          [
+                            {
+                              "substring": "1",
+                              "substringBeginOffset": 8,
+                              "substringEndOffset": 8,
+                              "children": []
+                            }
+                          ]
+                        ]
+                      }
+                    ],
+                    [
+                      {
+                        "substring": "1",
+                        "substringBeginOffset": 12,
+                        "substringEndOffset": 12,
+                        "children": []
+                      }
+                    ]
+                  ]
+                }
+              ],
+              [
+                {
+                  "substring": "1",
+                  "substringBeginOffset": 16,
+                  "substringEndOffset": 16,
+                  "children": []
+                }
+              ]
+            ]
+          }
+        ]);
+      });
+
+      test("Operators and function applications", () =>
+      {
+        expect(processString("f(1 + 1 * 1, succ 1) + f(0) * f(1 - 1 - 1)")).toStrictEqual([
+          {
+            "substring": "f(1 + 1 * 1, succ 1) + f(0) * f(1 - 1 - 1)",
+            "substringBeginOffset": 0,
+            "substringEndOffset": 38,
+            "children": [
+              [
+                {
+                  "substring": "+",
+                  "substringBeginOffset": 18,
+                  "substringEndOffset": 18,
+                  "children": []
+                }
+              ],
+              [
+                {
+                  "substring": "f(1 + 1 * 1, succ 1)",
+                  "substringBeginOffset": 0,
+                  "substringEndOffset": 16,
+                  "children": [
+                    [
+                      {
+                        "substring": "f",
+                        "substringBeginOffset": 0,
+                        "substringEndOffset": 0,
+                        "children": []
+                      }
+                    ],
+                    [
+                      {
+                        "substring": "1 + 1 * 1",
+                        "substringBeginOffset": 2,
+                        "substringEndOffset": 10,
+                        "children": [
+                          [
+                            {
+                              "substring": "+",
+                              "substringBeginOffset": 4,
+                              "substringEndOffset": 4,
+                              "children": []
+                            }
+                          ],
+                          [
+                            {
+                              "substring": "1",
+                              "substringBeginOffset": 2,
+                              "substringEndOffset": 2,
+                              "children": []
+                            }
+                          ],
+                          [
+                            {
+                              "substring": "1 * 1",
+                              "substringBeginOffset": 6,
+                              "substringEndOffset": 10,
+                              "children": [
+                                [
+                                  {
+                                    "substring": "*",
+                                    "substringBeginOffset": 8,
+                                    "substringEndOffset": 8,
+                                    "children": []
+                                  }
+                                ],
+                                [
+                                  {
+                                    "substring": "1",
+                                    "substringBeginOffset": 6,
+                                    "substringEndOffset": 6,
+                                    "children": []
+                                  }
+                                ],
+                                [
+                                  {
+                                    "substring": "1",
+                                    "substringBeginOffset": 10,
+                                    "substringEndOffset": 10,
+                                    "children": []
+                                  }
+                                ]
+                              ]
+                            }
+                          ]
+                        ]
+                      }
+                    ],
+                    [
+                      {
+                        "substring": "succ 1",
+                        "substringBeginOffset": 13,
+                        "substringEndOffset": 15,
+                        "children": [
+                          [
+                            {
+                              "substring": "succ",
+                              "substringBeginOffset": 13,
+                              "substringEndOffset": 13,
+                              "children": []
+                            }
+                          ],
+                          [
+                            {
+                              "substring": "1",
+                              "substringBeginOffset": 15,
+                              "substringEndOffset": 15,
+                              "children": []
+                            }
+                          ]
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              ],
+              [
+                {
+                  "substring": "f(0) * f(1 - 1 - 1)",
+                  "substringBeginOffset": 20,
+                  "substringEndOffset": 38,
+                  "children": [
+                    [
+                      {
+                        "substring": "*",
+                        "substringBeginOffset": 25,
+                        "substringEndOffset": 25,
+                        "children": []
+                      }
+                    ],
+                    [
+                      {
+                        "substring": "f(0)",
+                        "substringBeginOffset": 20,
+                        "substringEndOffset": 23,
+                        "children": [
+                          [
+                            {
+                              "substring": "f",
+                              "substringBeginOffset": 20,
+                              "substringEndOffset": 20,
+                              "children": []
+                            }
+                          ],
+                          [
+                            {
+                              "substring": "0",
+                              "substringBeginOffset": 22,
+                              "substringEndOffset": 22,
+                              "children": []
+                            }
+                          ]
+                        ]
+                      }
+                    ],
+                    [
+                      {
+                        "substring": "f(1 - 1 - 1)",
+                        "substringBeginOffset": 27,
+                        "substringEndOffset": 38,
+                        "children": [
+                          [
+                            {
+                              "substring": "f",
+                              "substringBeginOffset": 27,
+                              "substringEndOffset": 27,
+                              "children": []
+                            }
+                          ],
+                          [
+                            {
+                              "substring": "1 - 1 - 1",
+                              "substringBeginOffset": 29,
+                              "substringEndOffset": 37,
+                              "children": [
+                                [
+                                  {
+                                    "substring": "-",
+                                    "substringBeginOffset": 35,
+                                    "substringEndOffset": 35,
+                                    "children": []
+                                  }
+                                ],
+                                [
+                                  {
+                                    "substring": "1 - 1",
+                                    "substringBeginOffset": 29,
+                                    "substringEndOffset": 33,
+                                    "children": [
+                                      [
+                                        {
+                                          "substring": "-",
+                                          "substringBeginOffset": 31,
+                                          "substringEndOffset": 31,
+                                          "children": []
+                                        }
+                                      ],
+                                      [
+                                        {
+                                          "substring": "1",
+                                          "substringBeginOffset": 29,
+                                          "substringEndOffset": 29,
+                                          "children": []
+                                        }
+                                      ],
+                                      [
+                                        {
+                                          "substring": "1",
+                                          "substringBeginOffset": 33,
+                                          "substringEndOffset": 33,
+                                          "children": []
+                                        }
+                                      ]
+                                    ]
+                                  }
+                                ],
+                                [
+                                  {
+                                    "substring": "1",
+                                    "substringBeginOffset": 37,
+                                    "substringEndOffset": 37,
+                                    "children": []
+                                  }
+                                ]
+                              ]
+                            }
+                          ]
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              ]
+            ]
+          }
+        ]);
+      });
+
+    });
+
+    describe("Bracketed Expressions", () =>
+    {
+      test("Top level brackets", () =>
+      {
+        expect(processString("(1 + 1 + 1 + 1)")).toStrictEqual([
+          {
+            "substring": "1 + 1 + 1 + 1",
+            "substringBeginOffset": 1,
+            "substringEndOffset": 13,
+            "children": [
+              [
+                {
+                  "substring": "+",
+                  "substringBeginOffset": 11,
+                  "substringEndOffset": 11,
+                  "children": []
+                }
+              ],
+              [
+                {
+                  "substring": "1 + 1 + 1",
+                  "substringBeginOffset": 1,
+                  "substringEndOffset": 9,
+                  "children": [
+                    [
+                      {
+                        "substring": "+",
+                        "substringBeginOffset": 7,
+                        "substringEndOffset": 7,
+                        "children": []
+                      }
+                    ],
+                    [
+                      {
+                        "substring": "1 + 1",
+                        "substringBeginOffset": 1,
+                        "substringEndOffset": 5,
+                        "children": [
+                          [
+                            {
+                              "substring": "+",
+                              "substringBeginOffset": 3,
+                              "substringEndOffset": 3,
+                              "children": []
+                            }
+                          ],
+                          [
+                            {
+                              "substring": "1",
+                              "substringBeginOffset": 1,
+                              "substringEndOffset": 1,
+                              "children": []
+                            }
+                          ],
+                          [
+                            {
+                              "substring": "1",
+                              "substringBeginOffset": 5,
+                              "substringEndOffset": 5,
+                              "children": []
+                            }
+                          ]
+                        ]
+                      }
+                    ],
+                    [
+                      {
+                        "substring": "1",
+                        "substringBeginOffset": 9,
+                        "substringEndOffset": 9,
+                        "children": []
+                      }
+                    ]
+                  ]
+                }
+              ],
+              [
+                {
+                  "substring": "1",
+                  "substringBeginOffset": 13,
+                  "substringEndOffset": 13,
+                  "children": []
+                }
+              ]
+            ]
+          }
+        ]);
+      });
+
+      test("Multiple nested Brackets", () =>
+      {
+        expect(processString("1 + 1 * f(1 + 1 - 1 + 0, ((((((0)))))), ((f(1 - 1)))) + ((((0)) + ((0))))")).toStrictEqual([
+          {
+            "substring": "1 + 1 * f(1 + 1 - 1 + 0, ((((((0)))))), ((f(1 - 1)))) + ((((0)) + ((0))))",
+            "substringBeginOffset": 0,
+            "substringEndOffset": 72,
+            "children": [
+              [
+                {
+                  "substring": "+",
+                  "substringBeginOffset": 54,
+                  "substringEndOffset": 54,
+                  "children": []
+                }
+              ],
+              [
+                {
+                  "substring": "1 + 1 * f(1 + 1 - 1 + 0, ((((((0)))))), ((f(1 - 1))))",
+                  "substringBeginOffset": 0,
+                  "substringEndOffset": 52,
+                  "children": [
+                    [
+                      {
+                        "substring": "+",
+                        "substringBeginOffset": 2,
+                        "substringEndOffset": 2,
+                        "children": []
+                      }
+                    ],
+                    [
+                      {
+                        "substring": "1",
+                        "substringBeginOffset": 0,
+                        "substringEndOffset": 0,
+                        "children": []
+                      }
+                    ],
+                    [
+                      {
+                        "substring": "1 * f(1 + 1 - 1 + 0, ((((((0)))))), ((f(1 - 1))))",
+                        "substringBeginOffset": 4,
+                        "substringEndOffset": 52,
+                        "children": [
+                          [
+                            {
+                              "substring": "*",
+                              "substringBeginOffset": 6,
+                              "substringEndOffset": 6,
+                              "children": []
+                            }
+                          ],
+                          [
+                            {
+                              "substring": "1",
+                              "substringBeginOffset": 4,
+                              "substringEndOffset": 4,
+                              "children": []
+                            }
+                          ],
+                          [
+                            {
+                              "substring": "f(1 + 1 - 1 + 0, ((((((0)))))), ((f(1 - 1))))",
+                              "substringBeginOffset": 8,
+                              "substringEndOffset": 52,
+                              "children": [
+                                [
+                                  {
+                                    "substring": "f",
+                                    "substringBeginOffset": 8,
+                                    "substringEndOffset": 8,
+                                    "children": []
+                                  }
+                                ],
+                                [
+                                  {
+                                    "substring": "1 + 1 - 1 + 0",
+                                    "substringBeginOffset": 10,
+                                    "substringEndOffset": 22,
+                                    "children": [
+                                      [
+                                        {
+                                          "substring": "+",
+                                          "substringBeginOffset": 20,
+                                          "substringEndOffset": 20,
+                                          "children": []
+                                        }
+                                      ],
+                                      [
+                                        {
+                                          "substring": "1 + 1 - 1",
+                                          "substringBeginOffset": 10,
+                                          "substringEndOffset": 18,
+                                          "children": [
+                                            [
+                                              {
+                                                "substring": "-",
+                                                "substringBeginOffset": 16,
+                                                "substringEndOffset": 16,
+                                                "children": []
+                                              }
+                                            ],
+                                            [
+                                              {
+                                                "substring": "1 + 1",
+                                                "substringBeginOffset": 10,
+                                                "substringEndOffset": 14,
+                                                "children": [
+                                                  [
+                                                    {
+                                                      "substring": "+",
+                                                      "substringBeginOffset": 12,
+                                                      "substringEndOffset": 12,
+                                                      "children": []
+                                                    }
+                                                  ],
+                                                  [
+                                                    {
+                                                      "substring": "1",
+                                                      "substringBeginOffset": 10,
+                                                      "substringEndOffset": 10,
+                                                      "children": []
+                                                    }
+                                                  ],
+                                                  [
+                                                    {
+                                                      "substring": "1",
+                                                      "substringBeginOffset": 14,
+                                                      "substringEndOffset": 14,
+                                                      "children": []
+                                                    }
+                                                  ]
+                                                ]
+                                              }
+                                            ],
+                                            [
+                                              {
+                                                "substring": "1",
+                                                "substringBeginOffset": 18,
+                                                "substringEndOffset": 18,
+                                                "children": []
+                                              }
+                                            ]
+                                          ]
+                                        }
+                                      ],
+                                      [
+                                        {
+                                          "substring": "0",
+                                          "substringBeginOffset": 22,
+                                          "substringEndOffset": 22,
+                                          "children": []
+                                        }
+                                      ]
+                                    ]
+                                  }
+                                ],
+                                [
+                                  {
+                                    "substring": "0",
+                                    "substringBeginOffset": 31,
+                                    "substringEndOffset": 31,
+                                    "children": []
+                                  }
+                                ],
+                                [
+                                  {
+                                    "substring": "f(1 - 1)",
+                                    "substringBeginOffset": 42,
+                                    "substringEndOffset": 49,
+                                    "children": [
+                                      [
+                                        {
+                                          "substring": "f",
+                                          "substringBeginOffset": 42,
+                                          "substringEndOffset": 42,
+                                          "children": []
+                                        }
+                                      ],
+                                      [
+                                        {
+                                          "substring": "1 - 1",
+                                          "substringBeginOffset": 44,
+                                          "substringEndOffset": 48,
+                                          "children": [
+                                            [
+                                              {
+                                                "substring": "-",
+                                                "substringBeginOffset": 46,
+                                                "substringEndOffset": 46,
+                                                "children": []
+                                              }
+                                            ],
+                                            [
+                                              {
+                                                "substring": "1",
+                                                "substringBeginOffset": 44,
+                                                "substringEndOffset": 44,
+                                                "children": []
+                                              }
+                                            ],
+                                            [
+                                              {
+                                                "substring": "1",
+                                                "substringBeginOffset": 48,
+                                                "substringEndOffset": 48,
+                                                "children": []
+                                              }
+                                            ]
+                                          ]
+                                        }
+                                      ]
+                                    ]
+                                  }
+                                ]
+                              ]
+                            }
+                          ]
+                        ]
+                      }
+                    ]
+                  ]
+                }
+              ],
+              [
+                {
+                  "substring": "((0)) + ((0))",
+                  "substringBeginOffset": 58,
+                  "substringEndOffset": 70,
+                  "children": [
+                    [
+                      {
+                        "substring": "+",
+                        "substringBeginOffset": 64,
+                        "substringEndOffset": 64,
+                        "children": []
+                      }
+                    ],
+                    [
+                      {
+                        "substring": "0",
+                        "substringBeginOffset": 60,
+                        "substringEndOffset": 60,
+                        "children": []
+                      }
+                    ],
+                    [
+                      {
+                        "substring": "0",
+                        "substringBeginOffset": 68,
+                        "substringEndOffset": 68,
+                        "children": []
+                      }
+                    ]
+                  ]
+                }
+              ]
+            ]
+          }
+        ]);
+      });
+    }); 
+
+
+  });
+
+
+
+});

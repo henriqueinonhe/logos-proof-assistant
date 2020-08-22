@@ -7,8 +7,6 @@ import { InvalidArgumentException } from "../Utils/LogosUtils";
 import { ParseTreeNode as ParseTreeNode } from "./ParseTreeNode";
 import { OperatorAssociativity } from "./OperatorRecord";
 import fs from "fs";
-import { ParseTree } from "./ParseTree";
-import { TypeParseTreeIterator } from "../Type/TypeParseTreeIterator";
 
 export class Parser
 {
@@ -133,15 +131,6 @@ export class Parser
   }
 
   /**
-   * 
-   * Iterates through the string (`tokenNodeList`) searching for function
-   * applications.
-   * 
-   * Whenever a function application is found, it reduces it, that is,
-   * it parses the function application (and nested applications as well)
-   * removing all the nodes that comprises the function application (from the
-   * functional symbol to the last ")" of the last argument list) and substitutes
-   * it by a single node.
    * 
    * @param inputNodeList (out)
    * @param signature 
@@ -430,7 +419,6 @@ export class Parser
 
   private static generateOperatorsIteratorQueue(nodeList : LinkedList<ParseTreeNode>, symbolTable : FunctionalSymbolsAndOperatorsTable) : Array<LinkedListIterator<ParseTreeNode>>
   {
-    const functionalSymbolsIteratorQueue = [];
     const operatorsIteratorQueue = [];
     
     const highestPrecedenceRank = Array.from(symbolTable.getOperatorsRecordsTable().values()).reduce((highestPrecedenceRank, record) => 
