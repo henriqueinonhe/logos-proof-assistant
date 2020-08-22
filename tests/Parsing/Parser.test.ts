@@ -80,7 +80,7 @@ describe("private proccessFunctionApplicatons()", () =>
     const tokenString = lexer.lex(string, signature);
     const nodeList = Parser["convertTokenStringToNodeList"](tokenString);
     const operatorsQueue = Parser["generateOperatorsIteratorQueue"](nodeList, symbolTable);
-    const reducedNodeList = Parser["reduceFunctionApplicationsAndBracketedExpressions"](nodeList, signature, symbolTable, tokenString);
+    const reducedNodeList = Parser["parseExpression"](nodeList, signature, symbolTable, tokenString);
     return [reducedNodeList, operatorsQueue];
   }
 
@@ -1910,7 +1910,7 @@ describe("private reduceOperatorApplications()", () =>
     const tokenString = lexer.lex(string, signature);
     const nodeList = Parser["convertTokenStringToNodeList"](tokenString);
     const operatorsIteratorQueue = Parser["generateOperatorsIteratorQueue"](nodeList, symbolTable);
-    const nodeList2 = Parser["reduceFunctionApplicationsAndBracketedExpressions"](nodeList, signature, symbolTable, tokenString);
+    const nodeList2 = Parser["parseExpression"](nodeList, signature, symbolTable, tokenString);
     const nodeList3 = Parser["reduceOperatorApplications"](operatorsIteratorQueue, nodeList2, tokenString, signature, symbolTable);
     return nodeList3.toArray().map(node => node["reducedNodeObject"]());
   }
