@@ -142,31 +142,63 @@ export class Parser
     //Whitespace
     iteratorAtCurrentNode = Parser.parseWhitespace(inputNodeList, iteratorAtCurrentNode, signature);
 
+    //(ExpressionKernel Whitespace)+
     do
     {
-      Parser.checkExpectedToken(iteratorAtCurrentNode, signature, inputTokenString, ["TypedToken", "LeftRoundBracketToken", "VariableBindingToken", "VariableToken"]);
-      if(Parser.iteratorIsAtFunctionApplicationStartingPoint(iteratorAtCurrentNode, symbolTable))
-      {
-        const iteratorAtFunctionalSymbol = iteratorAtCurrentNode;
-        const iteratorAtAfterFunctionApplication = Parser.reduceSingleFunctionApplication(iteratorAtFunctionalSymbol, inputNodeList, outputNodeList, signature, symbolTable, inputTokenString);
-        iteratorAtCurrentNode = iteratorAtAfterFunctionApplication;
-      }
-      else if(Parser.iteratorIsAtBracketedExpressionStartingPoint(iteratorAtCurrentNode))
-      {
-        const iteratorAtLeftOpeningBracket = iteratorAtCurrentNode;
-        const iteratorAtAfterBracketedExpression = Parser.reduceSingleBracketedExpression(iteratorAtLeftOpeningBracket, inputNodeList, outputNodeList, signature, symbolTable, inputTokenString);
-        iteratorAtCurrentNode = iteratorAtAfterBracketedExpression;
-      }
-      else
-      {
-        iteratorAtCurrentNode = inputNodeList.transferNodeToEnd(iteratorAtCurrentNode, outputNodeList);
-      }
+      //ExpressionKernel
+      iteratorAtCurrentNode = Parser.parseExpressionKernel(iteratorAtCurrentNode, inputNodeList, outputNodeList, signature, symbolTable, inputTokenString);
       
+      //Whitespace
       iteratorAtCurrentNode = Parser.parseWhitespace(inputNodeList, iteratorAtCurrentNode, signature);
       inputNodeListEndHasBeenReached = !iteratorAtCurrentNode.isValid();
     } while(!inputNodeListEndHasBeenReached);
 
     return outputNodeList;
+  }
+
+  private static parseWhitespace(inputNodeList : LinkedList<ParseTreeNode>, iterator : LinkedListIterator<ParseTreeNode>, signature : Signature) : LinkedListIterator<ParseTreeNode>
+  {
+    while(iterator.isValid())
+    {
+      const currentToken = iterator.get().getCorrespondingInputSubstring().toString();
+      const currentTokenSort = signature.getRecord(currentToken).sort();
+      if(currentTokenSort === "WhitespaceToken")
+      {
+        iterator = inputNodeList.remove(iterator);
+      }
+      else
+      {
+        break;
+      }
+    }
+
+    return iterator;
+  }
+
+  private static parseExpressionKernel(iteratorAtCurrentNode : LinkedListIterator<ParseTreeNode>, inputNodeList : LinkedList<ParseTreeNode>, outputNodeList : LinkedList<ParseTreeNode>, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable, inputTokenString : TokenString) : LinkedListIterator<ParseTreeNode>
+  {
+    //ExpressionKernel <- FunctionApplication / BracketedExpression / PrimitiveExpression
+    Parser.checkExpectedToken(iteratorAtCurrentNode, signature, inputTokenString, ["TypedToken", "LeftRoundBracketToken", "VariableBindingToken", "VariableToken"]);
+
+    if(Parser.iteratorIsAtFunctionApplicationStartingPoint(iteratorAtCurrentNode, symbolTable))
+    {
+      const iteratorAtFunctionalSymbol = iteratorAtCurrentNode;
+      const iteratorAtAfterFunctionApplication = Parser.reduceSingleFunctionApplication(iteratorAtFunctionalSymbol, inputNodeList, outputNodeList, signature, symbolTable, inputTokenString);
+      iteratorAtCurrentNode = iteratorAtAfterFunctionApplication;
+    }
+    else if(Parser.iteratorIsAtBracketedExpressionStartingPoint(iteratorAtCurrentNode))
+    {
+      const iteratorAtLeftOpeningBracket = iteratorAtCurrentNode;
+      const iteratorAtAfterBracketedExpression = Parser.reduceSingleBracketedExpression(iteratorAtLeftOpeningBracket, inputNodeList, outputNodeList, signature, symbolTable, inputTokenString);
+      iteratorAtCurrentNode = iteratorAtAfterBracketedExpression;
+    }
+    else
+    {
+      iteratorAtCurrentNode = inputNodeList.transferNodeToEnd(iteratorAtCurrentNode, outputNodeList);
+    }
+
+    return iteratorAtCurrentNode;
+
   }
 
   /**
@@ -361,25 +393,6 @@ export class Parser
   private static hasNextArgumentList(iteratorAtPossibleArgumentListBegin : LinkedListIterator<ParseTreeNode>) : boolean
   {
     return iteratorAtPossibleArgumentListBegin.isValid() && iteratorAtPossibleArgumentListBegin.get().getCorrespondingInputSubstring().toString() === "(";
-  }
-
-  private static parseWhitespace(inputNodeList : LinkedList<ParseTreeNode>, iterator : LinkedListIterator<ParseTreeNode>, signature : Signature) : LinkedListIterator<ParseTreeNode>
-  {
-    while(iterator.isValid())
-    {
-      const currentToken = iterator.get().getCorrespondingInputSubstring().toString();
-      const currentTokenSort = signature.getRecord(currentToken).sort();
-      if(currentTokenSort === "WhitespaceToken")
-      {
-        iterator = inputNodeList.remove(iterator);
-      }
-      else
-      {
-        break;
-      }
-    }
-
-    return iterator;
   }
 
   private static checkExpectedToken(iteratorAtActualToken : LinkedListIterator<ParseTreeNode>, signature : Signature, inputTokenString : TokenString, expectedTokenSortList : Array<string>) : void
