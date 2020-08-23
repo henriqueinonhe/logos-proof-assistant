@@ -1,79 +1,79 @@
 {
-  "substring": "(- (+ 1 (: (* 2 3) 4)) (^ 5 6))",
+  "substring": "( (1 ((2 3 *) 4 :) +) (5 6 ^) -) ",
   "substringBeginOffset": 0,
-  "substringEndOffset": 30,
+  "substringEndOffset": 32,
   "children": [
     [
       {
         "substring": "-",
-        "substringBeginOffset": 1,
-        "substringEndOffset": 1,
+        "substringBeginOffset": 30,
+        "substringEndOffset": 30,
         "children": []
       }
     ],
     [
       {
-        "substring": "+ 1 (: (* 2 3) 4)",
-        "substringBeginOffset": 4,
-        "substringEndOffset": 20,
+        "substring": "1 ((2 3 *) 4 :) +",
+        "substringBeginOffset": 3,
+        "substringEndOffset": 19,
         "children": [
           [
             {
               "substring": "+",
-              "substringBeginOffset": 4,
-              "substringEndOffset": 4,
+              "substringBeginOffset": 19,
+              "substringEndOffset": 19,
               "children": []
             }
           ],
           [
             {
               "substring": "1",
-              "substringBeginOffset": 6,
-              "substringEndOffset": 6,
+              "substringBeginOffset": 3,
+              "substringEndOffset": 3,
               "children": []
             }
           ],
           [
             {
-              "substring": ": (* 2 3) 4",
-              "substringBeginOffset": 9,
-              "substringEndOffset": 19,
+              "substring": "(2 3 *) 4 :",
+              "substringBeginOffset": 6,
+              "substringEndOffset": 16,
               "children": [
                 [
                   {
                     "substring": ":",
-                    "substringBeginOffset": 9,
-                    "substringEndOffset": 9,
+                    "substringBeginOffset": 16,
+                    "substringEndOffset": 16,
                     "children": []
                   }
                 ],
                 [
                   {
-                    "substring": "* 2 3",
-                    "substringBeginOffset": 12,
-                    "substringEndOffset": 16,
+                    "substring": "2 3 *",
+                    "substringBeginOffset": 7,
+                    "substringEndOffset": 11,
                     "children": [
                       [
                         {
                           "substring": "*",
-                          "substringBeginOffset": 12,
-                          "substringEndOffset": 12,
+                          "substringBeginOffset": 11,
+                          "substringEndOffset": 11,
                           "children": []
                         }
                       ],
                       [
                         {
                           "substring": "2",
-                          "substringBeginOffset": 14,
-                          "substringEndOffset": 14,
+                          "substringBeginOffset": 7,
+                          "substringEndOffset": 7,
                           "children": []
                         }
                       ],
                       [
                         {
                           "substring": "3",
-                          "substringBeginOffset": 16,
-                          "substringEndOffset": 16,
+                          "substringBeginOffset": 9,
+                          "substringEndOffset": 9,
                           "children": []
                         }
                       ]
@@ -83,8 +83,8 @@
                 [
                   {
                     "substring": "4",
-                    "substringBeginOffset": 19,
-                    "substringEndOffset": 19,
+                    "substringBeginOffset": 14,
+                    "substringEndOffset": 14,
                     "children": []
                   }
                 ]
@@ -96,31 +96,31 @@
     ],
     [
       {
-        "substring": "^ 5 6",
-        "substringBeginOffset": 24,
-        "substringEndOffset": 28,
+        "substring": "5 6 ^",
+        "substringBeginOffset": 23,
+        "substringEndOffset": 27,
         "children": [
           [
             {
               "substring": "^",
-              "substringBeginOffset": 24,
-              "substringEndOffset": 24,
+              "substringBeginOffset": 27,
+              "substringEndOffset": 27,
               "children": []
             }
           ],
           [
             {
               "substring": "5",
-              "substringBeginOffset": 26,
-              "substringEndOffset": 26,
+              "substringBeginOffset": 23,
+              "substringEndOffset": 23,
               "children": []
             }
           ],
           [
             {
               "substring": "6",
-              "substringBeginOffset": 28,
-              "substringEndOffset": 28,
+              "substringBeginOffset": 25,
+              "substringEndOffset": 25,
               "children": []
             }
           ]

@@ -2856,7 +2856,7 @@ describe("parse()", () =>
 
   describe("Post Conditions", () =>
   {
-    describe("Single Digit Arithmetic Infix Operator", () =>
+    describe("Single Digit Arithmetic Infix Operators", () =>
     {
       const lexer = new LogosLexer();
       const signature = new LogosSignature();
@@ -3328,7 +3328,7 @@ describe("parse()", () =>
       });
     });
 
-    describe("Single Digit Arithmetic Prefix Operator", () =>
+    describe("Single Digit Arithmetic Prefix Operators", () =>
     {
       const lexer = new LogosLexer();
       const signature = new LogosSignature();
@@ -3486,7 +3486,38 @@ describe("parse()", () =>
       });
     });
 
+    describe("Single Digit Arithmetic Postfix Operators", () =>
+    {
+      const lexer = new LogosLexer();
+      const signature = new LogosSignature();
+      signature.addRecord("0", new TypedTokenRecord(new Type("i")));
+      signature.addRecord("1", new TypedTokenRecord(new Type("i")));
+      signature.addRecord("2", new TypedTokenRecord(new Type("i")));
+      signature.addRecord("3", new TypedTokenRecord(new Type("i")));
+      signature.addRecord("4", new TypedTokenRecord(new Type("i")));
+      signature.addRecord("5", new TypedTokenRecord(new Type("i")));
+      signature.addRecord("6", new TypedTokenRecord(new Type("i")));
+      signature.addRecord("7", new TypedTokenRecord(new Type("i")));
+      signature.addRecord("8", new TypedTokenRecord(new Type("i")));
+      signature.addRecord("9", new TypedTokenRecord(new Type("i")));
+      signature.addRecord("+", new TypedTokenRecord(new Type("[i,i]->i")));
+      signature.addRecord("*", new TypedTokenRecord(new Type("[i,i]->i")));
+      signature.addRecord("-", new TypedTokenRecord(new Type("[i,i]->i")));
+      signature.addRecord(":", new TypedTokenRecord(new Type("[i,i]->i")));
+      signature.addRecord("^", new TypedTokenRecord(new Type("[i,i]->i")));
 
+      const symbolTable = new FunctionalSymbolsAndOperatorsTable();
+      symbolTable.addOperatorSymbol("^", 2, 2, 10, OperatorAssociativity.Right);
+      symbolTable.addOperatorSymbol("*", 2, 2, 20, OperatorAssociativity.Left);
+      symbolTable.addOperatorSymbol(":", 2, 2, 30, OperatorAssociativity.Left);
+      symbolTable.addOperatorSymbol("+", 2, 2, 40, OperatorAssociativity.Left);
+      symbolTable.addOperatorSymbol("-", 2, 2, 50, OperatorAssociativity.Left);
+
+      test("Happy Path", () =>
+      {
+        expect(Parser.parse("( (1 ((2 3 *) 4 :) +) (5 6 ^) -) ", lexer, signature, symbolTable));
+      });
+    });
 
   });
 });

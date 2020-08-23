@@ -507,9 +507,17 @@ export class Parser
 
       //Left Operands
       for(let leftOperandCounter = 0, iteratorAtCurrentOperandNode = iteratorAtOperator.clone().goToPrevious(); 
-        leftOperandCounter < numberOfExpectedLeftOperands; 
+        leftOperandCounter < numberOfExpectedLeftOperands;
         leftOperandCounter++, iteratorAtCurrentOperandNode = iteratorAtOperator.clone().goToPrevious())
       {
+        if(!iteratorAtCurrentOperandNode.isValid())
+        {
+          const operatorString = iteratorAtOperator.get().getCorrespondingInputSubstring().toString();
+          const operatorBeginOffset = iteratorAtOperator.get().substringBeginOffset!;
+          const operatorEndOffset = iteratorAtOperator.get().substringEndOffset!;
+          throw new ParsingException(`Operator "${operatorString}" expected ${numberOfExpectedLeftOperands} left operands but found ${leftOperandCounter}!`, operatorBeginOffset, operatorEndOffset, inputTokenString);
+        }
+
         const listWrappedCurrentOperand = new LinkedList<ParseTreeNode>();
         const currentOperandNode = iteratorAtCurrentOperandNode.get();
         if(currentOperandNode.isSingleToken())
@@ -526,6 +534,14 @@ export class Parser
         rightOperandCounter < numberOfExpectedRightOperands; 
         rightOperandCounter++, iteratorAtCurrentOperandNode = iteratorAtOperator.clone().goToNext())
       {
+        if(!iteratorAtCurrentOperandNode.isValid())
+        {
+          const operatorString = iteratorAtOperator.get().getCorrespondingInputSubstring().toString();
+          const operatorBeginOffset = iteratorAtOperator.get().substringBeginOffset!;
+          const operatorEndOffset = iteratorAtOperator.get().substringEndOffset!;
+          throw new ParsingException(`Operator "${operatorString}" expected ${numberOfExpectedRightOperands} right operands but found ${rightOperandCounter}!`, operatorBeginOffset, operatorEndOffset, inputTokenString);
+        }
+
         const listWrappedCurrentOperand = new LinkedList<ParseTreeNode>();
         const currentNode = iteratorAtCurrentOperandNode.get();
         if(currentNode.isSingleToken())
