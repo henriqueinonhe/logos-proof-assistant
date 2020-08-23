@@ -2980,12 +2980,11 @@ describe("parse()", () =>
       expect(() => Parser.parse(" ", lexer, signature, symbolTable)).toThrow("Premature end of string");
     });
 
-    test(`Whitespace (ExpressionKernel Whitespace)* ")"`, () =>
+    test(`Unsuitable way to start an expression`, () =>
     {
       expect(() => Parser.parse(" ) ", lexer, signature, symbolTable)).toThrow(`Found a RightRoundBracketToken `);
       expect(() => Parser.parse(" )( ", lexer, signature, symbolTable)).toThrow(`Found a RightRoundBracketToken `);
-
-      
+      expect(() => Parser.parse(" , ", lexer, signature, symbolTable)).toThrow(`Found a CommaToken `);
     });
 
     test("String should have ended", () =>
@@ -2995,15 +2994,20 @@ describe("parse()", () =>
       expect(() => Parser.parse(" (1 + 1), ", lexer, signature, symbolTable)).toThrow(`String should have ended here!`);
     });
 
-    test(`Whitespace (ExpressionKernel Whitespace)* ","`, () =>
+    test(`Missing function application closing bracket`, () =>
     {
-      expect(() => Parser.parse(" , ", lexer, signature, symbolTable)).toThrow(`Found a CommaToken `);
+      expect(() => Parser.parse(" f(1 ", lexer, signature, symbolTable)).toThrow(`Premature end of string`);
 
+      expect(() => Parser.parse(" f(1, f(1, f(1, 1, 0 + 0))", lexer, signature, symbolTable)).toThrow(`Premature end of string`);
+
+      expect(() => Parser.parse(" f(1, f(1, f(1, 1, 0 + 0)) + 1", lexer, signature, symbolTable)).toThrow(`Premature end of string`);
     });
 
-    test(`FunctionalSymbol "(" Expression ("," Expression)* `, () =>
+    test("Missing bracketed expression closing bracket", () =>
     {
-      // expect(() => Parser.parse(" f(1 ", lexer, signature, symbolTable)).toThrow(`Premature end of string`);
+      expect(() => Parser.parse(" ( 1 + 1 ", lexer, signature, symbolTable)).toThrow(`Premature end of string`);
+
+      expect(() => Parser.parse(" (( 1 + 1) + 1 ", lexer, signature, symbolTable)).toThrow(`Premature end of string`);
     });
   });
 

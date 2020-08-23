@@ -280,11 +280,8 @@ export class Parser
   {
     //FunctionApplication <- FunctionalSymbol ArgumentList+
 
-    //This is the node that will be puhsed into outputNodeList
     let topLevelFunctionApplicationNode = new ParseTreeNode(inputTokenString);
     let listWrappedToplevelFunctionApplicationNode = new LinkedList(topLevelFunctionApplicationNode);
-
-    /* Populate topLevelFunctionalApplicationReducedNode children */
 
     //Functional Symbol
     const listWrappedFunctionalSymbolNode = new LinkedList<ParseTreeNode>();
@@ -362,6 +359,7 @@ export class Parser
 
     argumentNodeListArray.push(listWrappedExpressionNode);
 
+    //("," Expression)*
     let iteratorAtCurrentArgumentSeparator = iteratorAtAfterExpression;
     while(Parser.hasNextArgument(iteratorAtCurrentArgumentSeparator))
     {
@@ -376,25 +374,11 @@ export class Parser
       iteratorAtCurrentArgumentSeparator = iteratorAtAfterExpression;
     } 
 
+    //")"
     Parser.checkExpectedToken(iteratorAtCurrentArgumentSeparator, signature, inputTokenString, ["RightRoundBracketToken"]);
 
     const iteratorAtArgumentListClosingBracket = iteratorAtCurrentArgumentSeparator.clone();
     return [iteratorAtArgumentListClosingBracket, argumentNodeListArray];
-  }
-
-  private static removeArgumentNodeListTrailingWhitespace(argumentNodeList : LinkedList<ParseTreeNode>) : void
-  {
-    while(argumentNodeList.atLast().getCorrespondingInputSubstring().toString() === " ")
-    {
-      argumentNodeList.pop();
-    }
-  }
-
-  private static functionArgumentHasFinished(iterator : LinkedListIterator<ParseTreeNode>) : boolean
-  {
-    const currentToken = iterator.get().getCorrespondingInputSubstring().toString();
-    return currentToken === "," ||
-           currentToken === ")";
   }
 
   private static hasNextArgument(iteratorAtArgumentSeparator : LinkedListIterator<ParseTreeNode>) : boolean
