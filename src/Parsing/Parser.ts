@@ -23,7 +23,7 @@ export class Parser
    * @param signature 
    * @param symbolTable 
    */
-  public static parse(string : string, lexer : Lexer, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable) : void //NOTE Stub for now
+  public static parse(string : string, lexer : Lexer, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable) : ParseTreeNode
   {
     //1. Lex
     const tokenString = lexer.lex(string, signature);
@@ -32,22 +32,28 @@ export class Parser
       throw new InvalidArgumentException("Cannot parse empty string!");
     }
 
-    //2. Wrap Token String
+    //2. Wrap Token String Into Node List
     const nodeList = Parser.convertTokenStringToNodeList(tokenString);
     
-    //3. Iterators to Tokens For Further Processing
-    const [operatorsIteratorQueue, defaultPrefixOperatorsIteratorQueue] = Parser.generateOperatorsAndDefaultPrefixOperatorsIteratorQueue(nodeList, signature, symbolTable);
-
+    //3. Iterators to Operators For Further Processing
+    const operatorsIteratorQueue = Parser.generateOperatorsIteratorQueue(nodeList, symbolTable);
 
     //4. Parse Function Applications and Bracketed Expressions
-    const rootList = Parser.parseTopMostExpression(nodeList, signature, symbolTable, tokenString);
+    const reducedFunctionApplicationAndBracketedEpxressionsNodeList = Parser.parseTopMostExpression(nodeList, signature, symbolTable, tokenString);
     
     //5. Operator Binding
-    const reducedOperatorApplicationsNodeList = Parser.parseOperatorApplications(operatorsIteratorQueue, defaultPrefixOperatorsIteratorQueue, rootList, tokenString, signature, symbolTable);
+    const reducedOperatorApplicationsNodeList = Parser.parseOperatorApplications(operatorsIteratorQueue, reducedFunctionApplicationAndBracketedEpxressionsNodeList, tokenString, signature, symbolTable);
 
-    fs.writeFileSync("temp.json", JSON.stringify(reducedOperatorApplicationsNodeList.toArray().map(element => element["reducedNodeObject"]()), null, 2));
+    fs.writeFileSync("temp.json", JSON.stringify(reducedOperatorApplicationsNodeList.atHead()["reducedNodeObject"](), null, 2));
+
+    return reducedOperatorApplicationsNodeList.atHead();
   }
 
+  /**
+   * Converts token string to a [[ParseTreeNode]] [[LinkedList]] for further processing.
+   * 
+   * @param tokenString 
+   */
   private static convertTokenStringToNodeList(tokenString : TokenString) : LinkedList<ParseTreeNode>
   {
     const nodeList = new LinkedList<ParseTreeNode>();
@@ -60,8 +66,7 @@ export class Parser
   }
 
   /**
-   * 
-   *  Reduces Function Applications and Bracketed Expressions, condensing
+   * Reduces Function Applications and Bracketed Expressions, condensing
    * these sub expressions into nodes.
    * 
    * This method carries out most of the parsing process so that after 
@@ -267,16 +272,6 @@ export class Parser
     return nextToken.getCorrespondingInputSubstring().toString() === "(";
   }
 
-  /**
-   * Parses a function application reducing it to a single node.
-   * 
-   * @param iteratorAtFunctionalSymbol 
-   * @param inputNodeList 
-   * @param outputNodeList (out)
-   * @param signature 
-   * @param symbolTable 
-   * @param inputTokenString 
-   */
   private static parseFunctionApplication(iteratorAtFunctionalSymbol : LinkedListIterator<ParseTreeNode>, inputNodeList : LinkedList<ParseTreeNode>, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable, inputTokenString : TokenString) : [LinkedListIterator<ParseTreeNode>, LinkedList<ParseTreeNode>]
   {
     //FunctionApplication <- FunctionalSymbol ArgumentList+
@@ -432,10 +427,9 @@ export class Parser
     }
   }
 
-  private static generateOperatorsAndDefaultPrefixOperatorsIteratorQueue(nodeList : LinkedList<ParseTreeNode>, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable) : [Array<LinkedListIterator<ParseTreeNode>>, Array<LinkedListIterator<ParseTreeNode>>]
+  private static generateOperatorsIteratorQueue(nodeList : LinkedList<ParseTreeNode>, symbolTable : FunctionalSymbolsAndOperatorsTable) : Array<LinkedListIterator<ParseTreeNode>>
   {
     const operatorsIteratorQueue = [];
-    const defaultPrefixOperatorsIteratorQueue = [];
     
     const highestPrecedenceRank = Array.from(symbolTable.getOperatorsRecordsTable().values()).reduce((highestPrecedenceRank, record) => 
     {
@@ -463,7 +457,6 @@ export class Parser
     {
       const currentNode = nodeListIterator.get();
       const token = currentNode.getCorrespondingInputSubstring().toString();
-      const tokenRecord = signature.getRecord(token);
       const nodeOperatorRecord = symbolTable.getOperatorRecord(token);
       if(nodeOperatorRecord !== undefined)
       {
@@ -477,13 +470,6 @@ export class Parser
           operatorsIteratorTable[tableIndex].unshift(nodeListIterator.clone());
         }
       }
-      else if(tokenRecord.sort() === "TypedToken" ||
-              tokenRecord.sort() === "VariableToken" ||
-              tokenRecord.sort() === "VariableBindingToken")
-      {
-        defaultPrefixOperatorsIteratorQueue.push(nodeListIterator.clone());
-      }
-
       nodeListIterator.goToNext();
     }
 
@@ -496,11 +482,11 @@ export class Parser
       }
     }
 
-    return [operatorsIteratorQueue, defaultPrefixOperatorsIteratorQueue];
+    return operatorsIteratorQueue;
   }
 
 
-  private static parseOperatorApplications(operatorsIteratorQueue : Array<LinkedListIterator<ParseTreeNode>>, defaultPrefixOperatorsIteratorQueue : Array<LinkedListIterator<ParseTreeNode>>,  outputNodeList : LinkedList<ParseTreeNode>, inputTokenString : TokenString, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable) : LinkedList<ParseTreeNode>
+  private static parseOperatorApplications(operatorsIteratorQueue : Array<LinkedListIterator<ParseTreeNode>>, outputNodeList : LinkedList<ParseTreeNode>, inputTokenString : TokenString, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable) : LinkedList<ParseTreeNode>
   {
     for(const iteratorAtOperator of operatorsIteratorQueue)
     {
@@ -669,8 +655,6 @@ export class Parser
 
     return outputNodeList;
   }
-
-  
 }
 
 

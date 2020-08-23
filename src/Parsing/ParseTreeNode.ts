@@ -4,10 +4,9 @@ import { LogicErrorException } from "../Utils/LogosUtils";
 
 export class ParseTreeNode
 {
-  constructor(inputTokenString : TokenString, /*parent : ParseTreeNode | null,*/ substringBeginOffset ?: number, substringEndOffset ?: number)
+  constructor(inputTokenString : TokenString, substringBeginOffset ?: number, substringEndOffset ?: number)
   {
     this.inputTokenString = inputTokenString;
-    //this.parent = parent;
     this.children = [];
     this.substringBeginOffset = substringBeginOffset;
     this.substringEndOffset = substringEndOffset;
@@ -71,7 +70,6 @@ export class ParseTreeNode
   }
 
   private inputTokenString : TokenString;
-  //public parent : ParseTreeNode | null;
   public children : Array<LinkedList<ParseTreeNode>>;
   public substringBeginOffset : number | undefined;
   public substringEndOffset : number | undefined;

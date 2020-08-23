@@ -1,8 +1,131 @@
-[
-  {
-    "substring": "1",
-    "substringBeginOffset": 0,
-    "substringEndOffset": 0,
-    "children": []
-  }
-]
+{
+  "substring": "- (+ 1 (: (* 2 3) 4)) (^ 5 6)",
+  "substringBeginOffset": 1,
+  "substringEndOffset": 29,
+  "children": [
+    [
+      {
+        "substring": "-",
+        "substringBeginOffset": 1,
+        "substringEndOffset": 1,
+        "children": []
+      }
+    ],
+    [
+      {
+        "substring": "+ 1 (: (* 2 3) 4)",
+        "substringBeginOffset": 4,
+        "substringEndOffset": 20,
+        "children": [
+          [
+            {
+              "substring": "+",
+              "substringBeginOffset": 4,
+              "substringEndOffset": 4,
+              "children": []
+            }
+          ],
+          [
+            {
+              "substring": "1",
+              "substringBeginOffset": 6,
+              "substringEndOffset": 6,
+              "children": []
+            }
+          ],
+          [
+            {
+              "substring": ": (* 2 3) 4",
+              "substringBeginOffset": 9,
+              "substringEndOffset": 19,
+              "children": [
+                [
+                  {
+                    "substring": ":",
+                    "substringBeginOffset": 9,
+                    "substringEndOffset": 9,
+                    "children": []
+                  }
+                ],
+                [
+                  {
+                    "substring": "* 2 3",
+                    "substringBeginOffset": 12,
+                    "substringEndOffset": 16,
+                    "children": [
+                      [
+                        {
+                          "substring": "*",
+                          "substringBeginOffset": 12,
+                          "substringEndOffset": 12,
+                          "children": []
+                        }
+                      ],
+                      [
+                        {
+                          "substring": "2",
+                          "substringBeginOffset": 14,
+                          "substringEndOffset": 14,
+                          "children": []
+                        }
+                      ],
+                      [
+                        {
+                          "substring": "3",
+                          "substringBeginOffset": 16,
+                          "substringEndOffset": 16,
+                          "children": []
+                        }
+                      ]
+                    ]
+                  }
+                ],
+                [
+                  {
+                    "substring": "4",
+                    "substringBeginOffset": 19,
+                    "substringEndOffset": 19,
+                    "children": []
+                  }
+                ]
+              ]
+            }
+          ]
+        ]
+      }
+    ],
+    [
+      {
+        "substring": "^ 5 6",
+        "substringBeginOffset": 24,
+        "substringEndOffset": 28,
+        "children": [
+          [
+            {
+              "substring": "^",
+              "substringBeginOffset": 24,
+              "substringEndOffset": 24,
+              "children": []
+            }
+          ],
+          [
+            {
+              "substring": "5",
+              "substringBeginOffset": 26,
+              "substringEndOffset": 26,
+              "children": []
+            }
+          ],
+          [
+            {
+              "substring": "6",
+              "substringBeginOffset": 28,
+              "substringEndOffset": 28,
+              "children": []
+            }
+          ]
+        ]
+      }
+    ]
+  ]
+}
