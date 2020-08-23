@@ -1882,7 +1882,7 @@ describe("private proccessFunctionApplicatons()", () =>
 
 });
 
-describe("private reduceOperatorApplications()", () =>
+describe("private parseOperatorApplications()", () =>
 {
   const lexer = new LogosLexer();
   const signature = new LogosSignature();
@@ -1911,7 +1911,7 @@ describe("private reduceOperatorApplications()", () =>
     const nodeList = Parser["convertTokenStringToNodeList"](tokenString);
     const operatorsIteratorQueue = Parser["generateOperatorsIteratorQueue"](nodeList, symbolTable);
     const nodeList2 = Parser["parseTopMostExpression"](nodeList, signature, symbolTable, tokenString);
-    const nodeList3 = Parser["reduceOperatorApplications"](operatorsIteratorQueue, nodeList2, tokenString, signature, symbolTable);
+    const nodeList3 = Parser["parseOperatorApplications"](operatorsIteratorQueue, nodeList2, tokenString, signature, symbolTable);
     return nodeList3.toArray().map(node => node["reducedNodeObject"]());
   }
 

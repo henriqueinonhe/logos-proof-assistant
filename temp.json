@@ -1,22 +1,26 @@
 [
   {
-    "substring": "(1 + 1)",
-    "substringBeginOffset": 1,
-    "substringEndOffset": 7,
+    "substring": "1 + 1",
+    "substringBeginOffset": 2,
+    "substringEndOffset": 6,
     "children": [
+      [
+        {
+          "substring": "+",
+          "substringBeginOffset": 4,
+          "substringEndOffset": 4,
+          "children": []
+        }
+      ],
       [
         {
           "substring": "1",
           "substringBeginOffset": 2,
           "substringEndOffset": 2,
           "children": []
-        },
-        {
-          "substring": "+",
-          "substringBeginOffset": 4,
-          "substringEndOffset": 4,
-          "children": []
-        },
+        }
+      ],
+      [
         {
           "substring": "1",
           "substringBeginOffset": 6,

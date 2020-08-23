@@ -42,9 +42,9 @@ export class Parser
     const rootList = Parser.parseTopMostExpression(nodeList, signature, symbolTable, tokenString);
     
     //5. Reduce Operator Applications
-    //const reducedOperatorApplicationsNodeList = Parser.reduceOperatorApplications(operatorsIteratorQueue, rootList, tokenString, signature, symbolTable);
+    const reducedOperatorApplicationsNodeList = Parser.parseOperatorApplications(operatorsIteratorQueue, rootList, tokenString, signature, symbolTable);
 
-    fs.writeFileSync("temp.json", JSON.stringify(rootList.toArray().map(element => element["reducedNodeObject"]()), null, 2));
+    fs.writeFileSync("temp.json", JSON.stringify(reducedOperatorApplicationsNodeList.toArray().map(element => element["reducedNodeObject"]()), null, 2));
   }
 
   private static convertTokenStringToNodeList(tokenString : TokenString) : LinkedList<ParseTreeNode>
@@ -58,54 +58,17 @@ export class Parser
     return nodeList;
   }
 
-  private static parseTopMostExpression(inputNodeList : LinkedList<ParseTreeNode>, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable, inputTokenString : TokenString) : LinkedList<ParseTreeNode>
-  {
-    const startIterator = inputNodeList.iteratorAtHead();
-    const [iteratorAtCurrentNode, outputNodeList] = Parser.parseExpression(startIterator, inputNodeList, signature, symbolTable, inputTokenString);
-
-    if(iteratorAtCurrentNode.isValid())
-    {
-      throw new ParsingException("String should have ended here!", iteratorAtCurrentNode.get().substringBeginOffset!, iteratorAtCurrentNode.get().substringEndOffset!, inputTokenString);;
-    }
-
-    return outputNodeList;
-  }
-
-  private static parseBracketedExpression(iteratorAtOpeningLeftBracket : LinkedListIterator<ParseTreeNode>, inputNodeList : LinkedList<ParseTreeNode>, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable, inputTokenString : TokenString) : [LinkedListIterator<ParseTreeNode>, LinkedList<ParseTreeNode>]
-  {
-    //BracketedExpression <- "(" Expression ")"
-    const bracketedExpressionNode = new ParseTreeNode(inputTokenString);
-    const listWrappedBracketedExpressionNode = new LinkedList(bracketedExpressionNode);
-
-    //"("
-    Parser.checkExpectedToken(iteratorAtOpeningLeftBracket, signature, inputTokenString, ["LeftRoundBracketToken"]);
-    let iteratorAtCurrentNode = iteratorAtOpeningLeftBracket.clone().goToNext();
-
-    const [iteratorAtAfterExpression, expressionNodeList] = Parser.parseExpression(iteratorAtCurrentNode, inputNodeList, signature, symbolTable, inputTokenString);
-    
-    bracketedExpressionNode.children.push(expressionNodeList);
-    iteratorAtCurrentNode = iteratorAtAfterExpression;
-
-    //")"
-    Parser.checkExpectedToken(iteratorAtAfterExpression, signature, inputTokenString, ["RightRoundBracketToken"]);
-    const iteratorAtAfterBracketedExpression = iteratorAtCurrentNode.clone().goToNext();
-
-    //Offsets
-    bracketedExpressionNode.substringBeginOffset = iteratorAtOpeningLeftBracket.get().substringBeginOffset;
-    bracketedExpressionNode.substringEndOffset = iteratorAtAfterExpression.get().substringEndOffset;
-
-
-    return [iteratorAtAfterBracketedExpression, listWrappedBracketedExpressionNode];
-  }
-
   /**
-   * Reduces Function Applications and Bracketed Expressions, condensing
+   * 
+   *  Reduces Function Applications and Bracketed Expressions, condensing
    * these sub expressions into nodes.
    * 
    * This method carries out most of the parsing process so that after 
    * there will be only operator binding left to do.
    * 
    * The PEG associated with this method is:
+   * 
+   * TopMostExpression <- Expression EOF
    * 
    * Expression <- Whitespace (ExpressionKernel Whitespace)+
    * 
@@ -121,10 +84,25 @@ export class Parser
    * 
    * PrimitiveExpression <- FunctionalSymbol / NonFunctionalSymbol
    * 
-   * @param inputNodeList (out)
+   * @param inputNodeList 
    * @param signature 
    * @param symbolTable 
+   * @param inputTokenString 
    */
+  private static parseTopMostExpression(inputNodeList : LinkedList<ParseTreeNode>, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable, inputTokenString : TokenString) : LinkedList<ParseTreeNode>
+  {
+    const startIterator = inputNodeList.iteratorAtHead();
+    const [iteratorAtCurrentNode, outputNodeList] = Parser.parseExpression(startIterator, inputNodeList, signature, symbolTable, inputTokenString);
+
+    const inputNodeListHasEnded = !iteratorAtCurrentNode.isValid();
+    if(!inputNodeListHasEnded)
+    {
+      throw new ParsingException("String should have ended here!", iteratorAtCurrentNode.get().substringBeginOffset!, iteratorAtCurrentNode.get().substringEndOffset!, inputTokenString);
+    }
+
+    return outputNodeList;
+  }
+
   private static parseExpression(iterator : LinkedListIterator<ParseTreeNode>, inputNodeList : LinkedList<ParseTreeNode>, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable, inputTokenString : TokenString) : [LinkedListIterator<ParseTreeNode>, LinkedList<ParseTreeNode>]
   {
     //Expression <- Whitespace (ExpressionKernel Whitespace)+
@@ -222,6 +200,33 @@ export class Parser
 
     return [iteratorAtCurrentNode, listWrappedExpressionKernelNode];
 
+  }
+
+  private static parseBracketedExpression(iteratorAtOpeningLeftBracket : LinkedListIterator<ParseTreeNode>, inputNodeList : LinkedList<ParseTreeNode>, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable, inputTokenString : TokenString) : [LinkedListIterator<ParseTreeNode>, LinkedList<ParseTreeNode>]
+  {
+    //BracketedExpression <- "(" Expression ")"
+    const bracketedExpressionNode = new ParseTreeNode(inputTokenString);
+    const listWrappedBracketedExpressionNode = new LinkedList(bracketedExpressionNode);
+
+    //"("
+    Parser.checkExpectedToken(iteratorAtOpeningLeftBracket, signature, inputTokenString, ["LeftRoundBracketToken"]);
+    let iteratorAtCurrentNode = iteratorAtOpeningLeftBracket.clone().goToNext();
+
+    const [iteratorAtAfterExpression, expressionNodeList] = Parser.parseExpression(iteratorAtCurrentNode, inputNodeList, signature, symbolTable, inputTokenString);
+    
+    bracketedExpressionNode.children.push(expressionNodeList);
+    iteratorAtCurrentNode = iteratorAtAfterExpression;
+
+    //")"
+    Parser.checkExpectedToken(iteratorAtAfterExpression, signature, inputTokenString, ["RightRoundBracketToken"]);
+    const iteratorAtAfterBracketedExpression = iteratorAtCurrentNode.clone().goToNext();
+
+    //Offsets
+    bracketedExpressionNode.substringBeginOffset = iteratorAtOpeningLeftBracket.get().substringBeginOffset;
+    bracketedExpressionNode.substringEndOffset = iteratorAtAfterExpression.get().substringEndOffset;
+
+
+    return [iteratorAtAfterBracketedExpression, listWrappedBracketedExpressionNode];
   }
 
   private static parsePrimitiveExpression(iteratorAtPrimitiveExpression : LinkedListIterator<ParseTreeNode>, inputNodeList : LinkedList<ParseTreeNode>) : [LinkedListIterator<ParseTreeNode>, LinkedList<ParseTreeNode>]
@@ -502,7 +507,7 @@ export class Parser
   }
 
 
-  private static reduceOperatorApplications(operatorsIteratorQueue : Array<LinkedListIterator<ParseTreeNode>>, outputNodeList : LinkedList<ParseTreeNode>, inputTokenString : TokenString, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable) : LinkedList<ParseTreeNode>
+  private static parseOperatorApplications(operatorsIteratorQueue : Array<LinkedListIterator<ParseTreeNode>>, outputNodeList : LinkedList<ParseTreeNode>, inputTokenString : TokenString, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable) : LinkedList<ParseTreeNode>
   {
     for(const iteratorAtOperator of operatorsIteratorQueue)
     {

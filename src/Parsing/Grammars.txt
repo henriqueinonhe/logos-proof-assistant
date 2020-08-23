@@ -48,6 +48,8 @@ PrimitiveSymbol -> FunctionalSymbol | NonFunctionalSymbol
 
 Equivalent Parsing Expression Grammar:
 
+TopMostExpression <- Expression EOF
+
 Expression <- Whitespace (ExpressionKernel Whitespace)+
 
 ExpressionKernel <- FunctionApplication / BracketedExpression / PrimitiveExpression
