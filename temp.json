@@ -1,42 +1,8 @@
 [
   {
-    "substring": "(F 1 ) 1",
+    "substring": "1",
     "substringBeginOffset": 0,
-    "substringEndOffset": 7,
-    "children": [
-      [
-        {
-          "substring": "F 1",
-          "substringBeginOffset": 1,
-          "substringEndOffset": 3,
-          "children": [
-            [
-              {
-                "substring": "F",
-                "substringBeginOffset": 1,
-                "substringEndOffset": 1,
-                "children": []
-              }
-            ],
-            [
-              {
-                "substring": "1",
-                "substringBeginOffset": 3,
-                "substringEndOffset": 3,
-                "children": []
-              }
-            ]
-          ]
-        }
-      ],
-      [
-        {
-          "substring": "1",
-          "substringBeginOffset": 7,
-          "substringEndOffset": 7,
-          "children": []
-        }
-      ]
-    ]
+    "substringEndOffset": 0,
+    "children": []
   }
 ]

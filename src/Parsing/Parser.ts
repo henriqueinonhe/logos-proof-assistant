@@ -586,6 +586,7 @@ export class Parser
       }
     }
 
+    //Parsing Default Prefix Operators
     outputNodeList = Parser.parseDefaultPrefixOperatorApplications(outputNodeList, inputTokenString);
 
     //Remove Proxy Nodes
@@ -629,18 +630,11 @@ export class Parser
       parentNodeSingleChild.transferNodeBefore(iteratorAtNodeToBeElevated, listThatOwnsParentNode, iteratorAtParentNode);
       listThatOwnsParentNode.remove(iteratorAtParentNode);
     }
-
-   
   }
 
   private static iteratorIsAtBracketedExpressionStartingPoint(iterator : LinkedListIterator<ParseTreeNode>) : boolean
   {
     return iterator.isValid() && iterator.get().getCorrespondingInputSubstring().toString() === "(";
-  }
-
-  private static bracketedExpressionHasEnded(iterator : LinkedListIterator<ParseTreeNode>) : boolean
-  {
-    return iterator.isValid() && iterator.get().getCorrespondingInputSubstring().toString() === ")";
   }
 
   private static parseDefaultPrefixOperatorApplications(outputNodeList : LinkedList<ParseTreeNode>, inputTokenString : TokenString) : LinkedList<ParseTreeNode>
