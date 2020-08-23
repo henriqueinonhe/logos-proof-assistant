@@ -42,11 +42,11 @@ export class Parser
     const reducedFunctionApplicationAndBracketedEpxressionsNodeList = Parser.parseTopMostExpression(nodeList, signature, symbolTable, tokenString);
     
     //5. Operator Binding
-    const reducedOperatorApplicationsNodeList = Parser.parseOperatorApplications(operatorsIteratorQueue, reducedFunctionApplicationAndBracketedEpxressionsNodeList, tokenString, signature, symbolTable);
+    const rootNode = Parser.parseOperatorApplications(operatorsIteratorQueue, reducedFunctionApplicationAndBracketedEpxressionsNodeList, tokenString, signature, symbolTable);
 
-    fs.writeFileSync("temp.json", JSON.stringify(reducedOperatorApplicationsNodeList.atHead()["reducedNodeObject"](), null, 2));
+    fs.writeFileSync("temp.json", JSON.stringify(rootNode["reducedNodeObject"](), null, 2));
 
-    return reducedOperatorApplicationsNodeList.atHead();
+    return rootNode;
   }
 
   /**
@@ -486,7 +486,7 @@ export class Parser
   }
 
 
-  private static parseOperatorApplications(operatorsIteratorQueue : Array<LinkedListIterator<ParseTreeNode>>, outputNodeList : LinkedList<ParseTreeNode>, inputTokenString : TokenString, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable) : LinkedList<ParseTreeNode>
+  private static parseOperatorApplications(operatorsIteratorQueue : Array<LinkedListIterator<ParseTreeNode>>, outputNodeList : LinkedList<ParseTreeNode>, inputTokenString : TokenString, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable) : ParseTreeNode
   {
     for(const iteratorAtOperator of operatorsIteratorQueue)
     {
@@ -587,7 +587,12 @@ export class Parser
       iterator.goToNext();
     }
 
-    return outputNodeList;
+    const rootNode = outputNodeList.atHead();
+    //Fixing offsets in case of bracket encased topmost string
+    rootNode.substringBeginOffset = 0;
+    rootNode.substringEndOffset = inputTokenString.size() - 1;
+    
+    return rootNode;
   }
 
   private static removeParseTreeProxyNodes(iteratorAtParentNode : LinkedListIterator<ParseTreeNode>) : void

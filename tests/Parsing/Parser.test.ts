@@ -1755,8 +1755,8 @@ describe("private parseOperatorApplications()", () =>
     const nodeList = Parser["convertTokenStringToNodeList"](tokenString);
     const operatorsIteratorQueue = Parser["generateOperatorsIteratorQueue"](nodeList, symbolTable);
     const nodeList2 = Parser["parseTopMostExpression"](nodeList, signature, symbolTable, tokenString);
-    const nodeList3 = Parser["parseOperatorApplications"](operatorsIteratorQueue, nodeList2, tokenString, signature, symbolTable);
-    return nodeList3.toArray().map(node => node["reducedNodeObject"]());
+    const rootNode = Parser["parseOperatorApplications"](operatorsIteratorQueue, nodeList2, tokenString, signature, symbolTable);
+    return [rootNode["reducedNodeObject"]()];
   }
 
   describe("Post Conditions", () =>
@@ -2430,9 +2430,9 @@ describe("private parseOperatorApplications()", () =>
       {
         expect(processString("(1 + 1 + 1 + 1)")).toStrictEqual([
           {
-            "substring": "1 + 1 + 1 + 1",
-            "substringBeginOffset": 1,
-            "substringEndOffset": 13,
+            "substring": "(1 + 1 + 1 + 1)",
+            "substringBeginOffset": 0,
+            "substringEndOffset": 14,
             "children": [
               [
                 {
@@ -3353,9 +3353,9 @@ describe("parse()", () =>
       test("Default prefix operators are parsed properly", () =>
       {
         expect(Parser.parse("(- (+ 1 (: (* 2 3) 4)) (^ 5 6))", lexer, signature, symbolTable)["reducedNodeObject"]()).toStrictEqual({
-          "substring": "- (+ 1 (: (* 2 3) 4)) (^ 5 6)",
-          "substringBeginOffset": 1,
-          "substringEndOffset": 29,
+          "substring": "(- (+ 1 (: (* 2 3) 4)) (^ 5 6))",
+          "substringBeginOffset": 0,
+          "substringEndOffset": 30,
           "children": [
             [
               {

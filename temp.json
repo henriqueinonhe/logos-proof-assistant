@@ -1,7 +1,7 @@
 {
-  "substring": "- (+ 1 (: (* 2 3) 4)) (^ 5 6)",
-  "substringBeginOffset": 1,
-  "substringEndOffset": 29,
+  "substring": "(- (+ 1 (: (* 2 3) 4)) (^ 5 6))",
+  "substringBeginOffset": 0,
+  "substringEndOffset": 30,
   "children": [
     [
       {
