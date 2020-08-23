@@ -21,6 +21,7 @@ signature.addRecord("-", new TypedTokenRecord(new Type("[i,i]->i")));
 signature.addRecord(":", new TypedTokenRecord(new Type("[i,i]->i")));
 signature.addRecord("^", new TypedTokenRecord(new Type("[i,i]->i")));
 signature.addRecord("succ", new TypedTokenRecord(new Type("i->i")));
+signature.addRecord("F", new TypedTokenRecord(new Type("i->i")));
 
 const symbolTable = new FunctionalSymbolsAndOperatorsTable();
 symbolTable.addFunctionalSymbol("f");
@@ -31,15 +32,15 @@ symbolTable.addOperatorSymbol("+", 2, 1, 40, OperatorAssociativity.Left);
 symbolTable.addOperatorSymbol("-", 2, 1, 40, OperatorAssociativity.Left);
 symbolTable.addOperatorSymbol("succ", 1, 0, 1, OperatorAssociativity.Left);
 
-// Parser.parse(" (1 + 1)", lexer, signature, symbolTable);
+Parser.parse("(F 1 ) 1", lexer, signature, symbolTable);
 
-describe("private generateOperatorsIteratorQueue()", () =>
+describe("private generateOperatorsAndDefaultPrefixOperatorsIteratorQueue()", () =>
 {
   function processString(string : string, lexer : Lexer, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable) : Array<LinkedListIterator<ParseTreeNode>>
   {
     const tokenString = lexer.lex(string, signature);
     const nodeList = Parser["convertTokenStringToNodeList"](tokenString);
-    return Parser["generateOperatorsIteratorQueue"](nodeList, symbolTable);
+    return Parser["generateOperatorsAndDefaultPrefixOperatorsIteratorQueue"](nodeList, signature, symbolTable)[0];
   }
 
   const lexer = new LogosLexer();
@@ -79,7 +80,7 @@ describe("private proccessFunctionApplicatons()", () =>
   {
     const tokenString = lexer.lex(string, signature);
     const nodeList = Parser["convertTokenStringToNodeList"](tokenString);
-    const operatorsQueue = Parser["generateOperatorsIteratorQueue"](nodeList, symbolTable);
+    const [operatorsQueue] = Parser["generateOperatorsAndDefaultPrefixOperatorsIteratorQueue"](nodeList, signature, symbolTable);
     const reducedNodeList = Parser["parseTopMostExpression"](nodeList, signature, symbolTable, tokenString);
     return [reducedNodeList, operatorsQueue];
   }
@@ -1909,9 +1910,9 @@ describe("private parseOperatorApplications()", () =>
   {
     const tokenString = lexer.lex(string, signature);
     const nodeList = Parser["convertTokenStringToNodeList"](tokenString);
-    const operatorsIteratorQueue = Parser["generateOperatorsIteratorQueue"](nodeList, symbolTable);
+    const [operatorsIteratorQueue, defaultPrefixOperatorsIteratorQueue] = Parser["generateOperatorsAndDefaultPrefixOperatorsIteratorQueue"](nodeList, signature, symbolTable);
     const nodeList2 = Parser["parseTopMostExpression"](nodeList, signature, symbolTable, tokenString);
-    const nodeList3 = Parser["parseOperatorApplications"](operatorsIteratorQueue, nodeList2, tokenString, signature, symbolTable);
+    const nodeList3 = Parser["parseOperatorApplications"](operatorsIteratorQueue, defaultPrefixOperatorsIteratorQueue, nodeList2, tokenString, signature, symbolTable);
     return nodeList3.toArray().map(node => node["reducedNodeObject"]());
   }
 

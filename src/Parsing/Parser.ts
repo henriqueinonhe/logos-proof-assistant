@@ -36,13 +36,14 @@ export class Parser
     const nodeList = Parser.convertTokenStringToNodeList(tokenString);
     
     //3. Iterators to Tokens For Further Processing
-    const operatorsIteratorQueue = Parser.generateOperatorsIteratorQueue(nodeList, symbolTable);
+    const [operatorsIteratorQueue, defaultPrefixOperatorsIteratorQueue] = Parser.generateOperatorsAndDefaultPrefixOperatorsIteratorQueue(nodeList, signature, symbolTable);
 
-    //4. Reduce Function Applications
+
+    //4. Parse Function Applications and Bracketed Expressions
     const rootList = Parser.parseTopMostExpression(nodeList, signature, symbolTable, tokenString);
     
-    //5. Reduce Operator Applications
-    const reducedOperatorApplicationsNodeList = Parser.parseOperatorApplications(operatorsIteratorQueue, rootList, tokenString, signature, symbolTable);
+    //5. Operator Binding
+    const reducedOperatorApplicationsNodeList = Parser.parseOperatorApplications(operatorsIteratorQueue, defaultPrefixOperatorsIteratorQueue, rootList, tokenString, signature, symbolTable);
 
     fs.writeFileSync("temp.json", JSON.stringify(reducedOperatorApplicationsNodeList.toArray().map(element => element["reducedNodeObject"]()), null, 2));
   }
@@ -431,9 +432,10 @@ export class Parser
     }
   }
 
-  private static generateOperatorsIteratorQueue(nodeList : LinkedList<ParseTreeNode>, symbolTable : FunctionalSymbolsAndOperatorsTable) : Array<LinkedListIterator<ParseTreeNode>>
+  private static generateOperatorsAndDefaultPrefixOperatorsIteratorQueue(nodeList : LinkedList<ParseTreeNode>, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable) : [Array<LinkedListIterator<ParseTreeNode>>, Array<LinkedListIterator<ParseTreeNode>>]
   {
     const operatorsIteratorQueue = [];
+    const defaultPrefixOperatorsIteratorQueue = [];
     
     const highestPrecedenceRank = Array.from(symbolTable.getOperatorsRecordsTable().values()).reduce((highestPrecedenceRank, record) => 
     {
@@ -461,6 +463,7 @@ export class Parser
     {
       const currentNode = nodeListIterator.get();
       const token = currentNode.getCorrespondingInputSubstring().toString();
+      const tokenRecord = signature.getRecord(token);
       const nodeOperatorRecord = symbolTable.getOperatorRecord(token);
       if(nodeOperatorRecord !== undefined)
       {
@@ -473,6 +476,12 @@ export class Parser
         {
           operatorsIteratorTable[tableIndex].unshift(nodeListIterator.clone());
         }
+      }
+      else if(tokenRecord.sort() === "TypedToken" ||
+              tokenRecord.sort() === "VariableToken" ||
+              tokenRecord.sort() === "VariableBindingToken")
+      {
+        defaultPrefixOperatorsIteratorQueue.push(nodeListIterator.clone());
       }
 
       nodeListIterator.goToNext();
@@ -487,11 +496,11 @@ export class Parser
       }
     }
 
-    return operatorsIteratorQueue;
+    return [operatorsIteratorQueue, defaultPrefixOperatorsIteratorQueue];
   }
 
 
-  private static parseOperatorApplications(operatorsIteratorQueue : Array<LinkedListIterator<ParseTreeNode>>, outputNodeList : LinkedList<ParseTreeNode>, inputTokenString : TokenString, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable) : LinkedList<ParseTreeNode>
+  private static parseOperatorApplications(operatorsIteratorQueue : Array<LinkedListIterator<ParseTreeNode>>, defaultPrefixOperatorsIteratorQueue : Array<LinkedListIterator<ParseTreeNode>>,  outputNodeList : LinkedList<ParseTreeNode>, inputTokenString : TokenString, signature : Signature, symbolTable : FunctionalSymbolsAndOperatorsTable) : LinkedList<ParseTreeNode>
   {
     for(const iteratorAtOperator of operatorsIteratorQueue)
     {
@@ -577,6 +586,7 @@ export class Parser
       }
     }
 
+    outputNodeList = Parser.parseDefaultPrefixOperatorApplications(outputNodeList, inputTokenString);
 
     //Remove Proxy Nodes
     const iterator = outputNodeList.iteratorAtHead();
@@ -632,6 +642,40 @@ export class Parser
   {
     return iterator.isValid() && iterator.get().getCorrespondingInputSubstring().toString() === ")";
   }
+
+  private static parseDefaultPrefixOperatorApplications(outputNodeList : LinkedList<ParseTreeNode>, inputTokenString : TokenString) : LinkedList<ParseTreeNode>
+  {
+    for(const node of outputNodeList)
+    {
+      for(const nodeList of node.children)
+      {
+        Parser.parseDefaultPrefixOperatorApplications(nodeList, inputTokenString);
+      }
+    }
+
+    if(outputNodeList.size() > 1)
+    {
+      const operatorApplicationNode = new ParseTreeNode(inputTokenString);
+      const listWrappedOperatorNode = new LinkedList<ParseTreeNode>();
+      const iteratorAtOperatorNode = outputNodeList.iteratorAtHead();
+      
+      let iteratorAtCurrentOperandNode = outputNodeList.transferNodeToEnd(iteratorAtOperatorNode, listWrappedOperatorNode);
+      operatorApplicationNode.children.push(listWrappedOperatorNode);
+      while(iteratorAtCurrentOperandNode.isValid())
+      {
+        const listWrappedCurrentOperandNode = new LinkedList<ParseTreeNode>();
+        iteratorAtCurrentOperandNode = outputNodeList.transferNodeToEnd(iteratorAtCurrentOperandNode, listWrappedCurrentOperandNode);
+        operatorApplicationNode.children.push(listWrappedCurrentOperandNode);
+      }
+      
+      outputNodeList.unshift(operatorApplicationNode);
+      operatorApplicationNode.substringBeginOffset = operatorApplicationNode.children[0].atHead().substringBeginOffset;
+      operatorApplicationNode.substringEndOffset = operatorApplicationNode.children[operatorApplicationNode.children.length - 1].atLast().substringEndOffset;
+    }
+
+    return outputNodeList;
+  }
+
   
 }
 
