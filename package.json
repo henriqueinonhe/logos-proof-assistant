@@ -27,7 +27,6 @@
         "typedoc": "^0.17.8"
     },
     "dependencies": {
-        "logos-utils": "^1.0.4",
         "typescript": "^3.9.7"
     }
 }

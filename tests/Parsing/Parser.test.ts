@@ -32,7 +32,7 @@ symbolTable.addOperatorSymbol("+", 2, 1, 40, OperatorAssociativity.Left);
 symbolTable.addOperatorSymbol("-", 2, 1, 40, OperatorAssociativity.Left);
 symbolTable.addOperatorSymbol("succ", 1, 0, 1, OperatorAssociativity.Left);
 
-// Parser.parse("", lexer, signature, symbolTable);
+// Parser.parse("(F 1) + 0 1", lexer, signature, symbolTable);
 
 describe("private generateOperatorsIteratorQueue()", () =>
 {
