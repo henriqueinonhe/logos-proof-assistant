@@ -47,7 +47,9 @@ export abstract class Lexer
       [currentToken, currentIndex] = this.nextToken(string, currentIndex, signature);
       if(!signature.hasRecord(currentToken.toString()))
       {
-        throw new InvalidArgumentException(`Token "${currentToken.toString()}" is not present in the signature!`);
+        throw new InvalidArgumentException(
+          `Token "${currentToken.toString()}" is not present in the signature!`
+        );
       }
       tokenList.push(currentToken);
     }
