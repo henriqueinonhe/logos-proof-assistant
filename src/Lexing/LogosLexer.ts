@@ -14,10 +14,7 @@ export class LogosLexer extends Lexer
   protected nextToken(string : string, currentIndex : number, signature : Signature) : [Token, number]
   {
     const currentChar = string[currentIndex];
-    if(currentChar === "(" ||
-       currentChar === ")" ||
-       currentChar === "," ||
-       currentChar === " ")
+    if(this.characterIsSeparator(currentChar))
     {
       const newIndex = currentIndex + 1;
       return [new Token(currentChar), newIndex];
