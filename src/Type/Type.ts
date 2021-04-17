@@ -7,7 +7,7 @@ import { InvalidArgumentException, LogicErrorException } from "../Utils/LogosUti
  * Represents a well formed Type.
  * 
  * Types are immutable objects, so any action that would modify a type creates
- * a new type instead with the desired modifications.
+ * a new type instead with the desired mutations.
  * 
  * Class Invariants:
  * - A [[Type]] is immutable, so it will remain the same throughout its entire life.

@@ -3,7 +3,7 @@ import { InvalidArgumentException } from "../Utils/LogosUtils";
 /**
  * Enum that categorizes type token sorts.
  * 
- *  * 1. LeftRoundBracket -> Used to disambiguate applications of the composition 
+ * 1. LeftRoundBracket -> Used to disambiguate applications of the composition 
  * operator.
  * 2. RightRoundBracket -> Same as above.
  * 3. LeftSquareBracket -> Used to delimit the "beginning" of a product type, 

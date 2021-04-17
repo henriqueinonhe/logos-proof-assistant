@@ -18,7 +18,7 @@ Arguments -> Expressions , Arguments | Expressions
 
 --------------------------------------------------------------------------------
 
-Correct Grammar (but not fit to implementation):
+Correct Grammar (but not fit for implementation):
 
 Expression -> Whitespace PrimitiveSymbol Whitespace |
               Whitespace BracketedExpression Whitespace |
